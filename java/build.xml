@@ -1,0 +1,64 @@
+<project name="MC" default="compile" basedir=".">
+
+  <property name="build.home" value="${basedir}/classes"/>
+  <property name="docs.home" value="${basedir}/docs"/>
+  <property name="src.home" value="${basedir}/src"/>
+  <property name="external.lib.dir" value="${basedir}/extlib"/>
+  <property name="javadoc.home" value="${basedir}/javadoc"/>
+
+  <property name="compile.debug" value="true"/>
+  <property name="compile.deprecation" value="true"/>
+  <property name="compile.optimize" value="true"/>
+  <property name="compile.source" value="1.7"/>
+  <property name="compile.classpath" value="classes"/>
+  <path id="project.classpath">
+    <pathelement path="{compile.classpath}/"/>
+    <fileset dir="${external.lib.dir}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+  
+<!-- ============== All Target ======================== -->
+
+  <target name="all" depends="clean,compile"
+  description="Clean build and dist directories, then compile"/>
+
+
+<!-- ============== Clean Target ======================== -->
+
+  <target name="clean" description="Delete old classes">
+    <delete dir="${build.home}"/>
+  </target>
+
+
+<!-- ============== Compile Target  ======================== -->
+
+  <target name="compile" depends="prepare" description="Compile Java sources">
+    <mkdir dir="${build.home}"/>
+    <javac srcdir="${src.home}"
+          destdir="${build.home}"
+	    debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+         optimize="${compile.optimize}"
+	classpath="${compile.classpath}"
+includeantruntime="false"
+           source="${compile.source}">
+    <classpath refid="project.classpath"/>
+    </javac>
+  </target>
+
+
+<!-- ============== Javadoc Target  ======================== -->
+<!-- Not implemented yet -->
+
+
+
+<!-- ============== Prepare Target  ======================== -->
+
+  <target name="prepare">
+    <mkdir dir="${build.home}"/>
+  </target>
+
+</project>
+
+
