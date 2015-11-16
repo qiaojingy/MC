@@ -87,9 +87,11 @@ public class TaskReader {
   	    pipeline.annotate(annotation);
 		List<CoreMap> stem = annotation.get(CoreAnnotations.SentencesAnnotation.class);
         // Read options
-		List<String> options = new ArrayList<String>();
+		List<CoreMap> options = new ArrayList<CoreMap>();
 		for (int i=1; i<=4; i++){
-		  options.add(terms[lineIndex+i]);
+		  annotation = new Annotation(terms[lineIndex+i]);
+		  pipeline.annotate(annotation);
+		  options.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 		}
 		Question question = new Question(questionType, stem, options);
 		questions.add(question);

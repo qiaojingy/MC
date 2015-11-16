@@ -25,7 +25,7 @@ public class Question implements Serializable, Decodable {
    */
   public final List<CoreMap> stem;
   public final QuestionType questionType;
-  public final List<String> options; 
+  public final List<CoreMap> options; 
 
   /**
    * Create a document from an id and a list of sentences.
@@ -34,7 +34,7 @@ public class Question implements Serializable, Decodable {
    * @param id The unique id of the document
    * @param sentences The sentences in the document
    */
-  public Question(QuestionType questionType, List<CoreMap> stem, List<String> options){
+  public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options){
     this.questionType = questionType;
     this.stem = stem;
 	this.options = options;
@@ -53,7 +53,7 @@ public class Question implements Serializable, Decodable {
     }
 	b.append("\n");
 	//--Print Options
-    for(String s : options){
+    for(CoreMap s : options){
 	  b.append(s.toString()).append("\n");
 	}
     return b.toString();
