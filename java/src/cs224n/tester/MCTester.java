@@ -29,7 +29,7 @@ import java.util.PriorityQueue;
  */
 
 public class MCTester<SYS extends MCSystem> {
-	private static String dataPath = "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/";
+	private static String dataPath = "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/MCTest/";
 
 	public static enum DataType {
 		TRAIN, DEV, TEST
@@ -77,7 +77,7 @@ public class MCTester<SYS extends MCSystem> {
 		//--Read Data
 		System.out.println("Reading documents ... ");
 		//(get path)
-		dataPath = props.getProperty("path", "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/");
+		dataPath = props.getProperty("path", "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/MCTest/");
 		if (!new File(dataPath).exists()){
 			System.out.println("ERROR: no such path");
 			System.exit(1);
