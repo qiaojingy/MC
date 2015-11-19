@@ -21,7 +21,7 @@ public class Passage implements Serializable, Decodable {
    * The sentences in this passage
    */
   public final List<CoreMap> sentences;
-  public List<CoreMap> tokens; 
+  public List<CoreLabel> tokens; 
   private final HashMap<CoreMap,Integer> sentenceToIndex = new HashMap<CoreMap,Integer>();
 
   /**
@@ -40,8 +40,19 @@ public class Passage implements Serializable, Decodable {
 	}
   }
 
-  public List<CoreMap> getTokens() {
+  public List<String> getTokenStrings() {
+	this.getTokens();
+	List<String> passageTokenStrings = new ArrayList<String>();
+	for (CoreLabel token : tokens) {
+	  passageTokenStrings.add(token.value());
+	}
+	return passageTokenStrings;
+  }
+
+
+  public List<CoreLabel> getTokens() {
 	if (tokens == null) {
+	  tokens = new ArrayList<CoreLabel>();
 	  for (CoreMap sentence : sentences) {
 		tokens.addAll(sentence.get(CoreAnnotations.TokensAnnotation.class)); 
 	  }

@@ -22,93 +22,96 @@ import java.util.*;
 import java.util.PriorityQueue;
 
 public class TaskReader {
-  public static List<Task> read(String fileName) {
-	try {
-      // FileReader reads text files in the default encoding
-      FileReader fileReader = new FileReader(fileName);
+	public static List<Task> read(String fileName) {
+		List<Task> tasks = new ArrayList<Task>();
+		try {
+			// FileReader reads text files in the default encoding
+			FileReader fileReader = new FileReader(fileName);
 
-      // Wrap FileReader in BufferedReader
-      BufferedReader bufferedReader = new BufferedReader(fileReader);
-      
-	  // Read a line. In MC datasets, one line correspondes to a task
-	  String line = bufferedReader.readLine();
-	  String[] terms = line.split("\t");
-	  
-	  // Id of the task
-	  String id = terms[0];
-	  // Author of the task
-	  String author = terms[1].split(";")[0].split(": ")[1];
-	  // Time spent
-	  Integer time = Integer.valueOf(terms[1].split(";")[1].split(": ")[1]);
-	  // Read passage
-	  Passage passage;
-	  // The string corresponds to the main passage
-	  String passageString = terms[2].replaceAll("\\\\newline", " ");
+			// Wrap FileReader in BufferedReader
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-	  // Use Stanford CoreNLP to process the string
-	  Properties props = new Properties();
-	  props.put("annotators", "tokenize, ssplit");
-	  StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+			String line;
+			while ((line = bufferedReader.readLine())!= null) {
+				// Read a line. In MC datasets, one line correspondes to a task
+				String[] terms = line.split("\t");
 
-	  Annotation annotation = new Annotation(passageString);
+				// Id of the task
+				String id = terms[0];
+				// Author of the task
+				String author = terms[1].split(";")[0].split(": ")[1];
+				// Time spent
+				Integer time = Integer.valueOf(terms[1].split(";")[1].split(": ")[1]);
+				// Read passage
+				Passage passage;
+				// The string corresponds to the main passage
+				String passageString = terms[2].replaceAll("\\\\newline", " ");
 
-	  // run all the selected Annotators on this text
-	  pipeline.annotate(annotation);
-	  
-	  List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-	  if (sentences != null && ! sentences.isEmpty()) {
-		passage = new Passage(sentences);
-      }
-	  else {
-		passage = null;
-	  }
+				// Use Stanford CoreNLP to process the string
+				Properties props = new Properties();
+				props.put("annotators", "tokenize, ssplit");
+				StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
-	  // Read questions
-	  List<Question> questions = new ArrayList<Question>();
-	  int lineIndex = 3;
-	  while (lineIndex < terms.length) {
-		// Read question type
-		String qtype = terms[lineIndex].split(": ")[0];
-		Question.QuestionType questionType = Question.QuestionType.ONE;
-		switch (qtype) {
-		  case "one":
-			questionType = Question.QuestionType.ONE;
-			break;
-		  case "multiple":
-			questionType = Question.QuestionType.MULTIPLE;
-			break;
-		  default:
-			System.out.println("Question Type Error");
-			break;
+				Annotation annotation = new Annotation(passageString);
+
+				// run all the selected Annotators on this text
+				pipeline.annotate(annotation);
+
+				List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+				if (sentences != null && ! sentences.isEmpty()) {
+					passage = new Passage(sentences);
+				}
+				else {
+					passage = null;
+				}
+
+				// Read questions
+				List<Question> questions = new ArrayList<Question>();
+				int lineIndex = 3;
+				while (lineIndex < terms.length) {
+					// Read question type
+					String qtype = terms[lineIndex].split(": ")[0];
+					Question.QuestionType questionType = Question.QuestionType.ONE;
+					switch (qtype) {
+						case "one":
+							questionType = Question.QuestionType.ONE;
+							break;
+						case "multiple":
+							questionType = Question.QuestionType.MULTIPLE;
+							break;
+						default:
+							System.out.println("Question Type Error");
+							break;
+					}
+					// Read question stem
+					String questionString = terms[lineIndex].split(": ")[1];
+					annotation = new Annotation(questionString);
+					pipeline.annotate(annotation);
+					List<CoreMap> stem = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+					// Read options
+					List<CoreMap> options = new ArrayList<CoreMap>();
+					for (int i=1; i<=4; i++){
+						annotation = new Annotation(terms[lineIndex+i]);
+						pipeline.annotate(annotation);
+						options.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
+					}
+					Question question = new Question(questionType, stem, options);
+					questions.add(question);
+					lineIndex += 5;
+				}
+				Task task = new Task(id, author, time, passage, questions);
+				tasks.add(task);
+				System.out.println("Task Reading is complete! ");
+				System.out.println();
+				System.out.println(task.normalPrint());
+			}
+
+			// Close files
+			bufferedReader.close();
 		}
-		// Read question stem
-		String questionString = terms[lineIndex].split(": ")[1];
-		annotation = new Annotation(questionString);
-  	    pipeline.annotate(annotation);
-		List<CoreMap> stem = annotation.get(CoreAnnotations.SentencesAnnotation.class);
-        // Read options
-		List<CoreMap> options = new ArrayList<CoreMap>();
-		for (int i=1; i<=4; i++){
-		  annotation = new Annotation(terms[lineIndex+i]);
-		  pipeline.annotate(annotation);
-		  options.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
-		}
-		Question question = new Question(questionType, stem, options);
-		questions.add(question);
-		lineIndex += 5;
-	  }
-	  Task task = new Task(id, author, time, passage, questions);
-	  System.out.println("Task Reading is complete! ");
-	  System.out.println();
-	  System.out.println(task.normalPrint());
-
-
-      // Close files
-      bufferedReader.close();
-    }
-    catch (IOException ex) {
-      System.out.println("Error reading file \"" + fileName + "\"");
-    } 
-    return null;
-  }
+		catch (IOException ex) {
+			System.out.println("Error reading file \"" + fileName + "\"");
+		} 
+		return tasks;
+	}
 }

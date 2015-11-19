@@ -3,6 +3,7 @@ package cs224n.MC;
 import cs224n.util.Decodable;
 
 import edu.stanford.nlp.util.*;
+import edu.stanford.nlp.ling.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -39,6 +40,31 @@ public class Question implements Serializable, Decodable {
     this.stem = stem;
 	this.options = options;
   }
+
+  // Return a list of strings representing tokens in the stem
+  public List<String> getStemTokenStrings() {
+	List<String> stemTokenStrings = new ArrayList<String>();
+	for (CoreMap s : stem) {
+	  for (CoreLabel token : s.get(CoreAnnotations.TokensAnnotation.class)) {
+		stemTokenStrings.add(token.value());
+	  }
+	}
+	return stemTokenStrings;
+  }
+
+  public List<List<String>> getOptionsTokenStrings() {
+	List<List<String>> optionsTokenStrings = new ArrayList<List<String>>();
+	for (CoreMap o : options) {
+	  List<String> optionTokenStrings = new ArrayList<String>();
+	  for (CoreLabel token : o.get(CoreAnnotations.TokensAnnotation.class)) {
+	    optionTokenStrings.add(token.value());
+	  }
+	  optionsTokenStrings.add(optionTokenStrings);
+	}
+	return optionsTokenStrings;
+  }
+
+
 
 
   public String normalPrint(){

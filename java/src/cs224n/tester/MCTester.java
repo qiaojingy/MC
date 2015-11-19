@@ -29,66 +29,99 @@ import java.util.PriorityQueue;
  */
 
 public class MCTester<SYS extends MCSystem> {
-  private static String dataPath = "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/";
+	private static String dataPath = "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/";
 
-  public static enum DataType {
-    TRAIN, DEV, TEST
-  }
+	public static enum DataType {
+		TRAIN, DEV, TEST
+	}
 
-  private static File getData(String dataPath) {
-    String fileName = dataPath.concat(new String("mc160.train.tsv"));
-	System.out.print("Reading:  ");
-    System.out.println(fileName);
-    String line = null;
+	private static List<Task> getData(String dataPath) {
+		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		System.out.print("Reading:  ");
+		System.out.println(fileName);
+		String line = null;
 
-	List<Task> tasks = TaskReader.read(fileName);
+		List<Task> tasks = TaskReader.read(fileName);
 
-    return null;
-  }
+		return tasks;
+	}
 
 
-  public static void main(String[] args) {
-    //--Get Properties
-    Properties props = StringUtils.argsToProperties(args);
-    PriorityQueue<String> keys = new PriorityQueue<String>();
-    int maxLength = 0;
-    for (Object key : props.keySet()) {
-      keys.add(key.toString());
-      maxLength = Math.max(maxLength, key.toString().length());
-    }
+	public static void main(String[] args) {
+		//--Get Properties
+		Properties props = StringUtils.argsToProperties(args);
+		PriorityQueue<String> keys = new PriorityQueue<String>();
+		int maxLength = 0;
+		for (Object key : props.keySet()) {
+			keys.add(key.toString());
+			maxLength = Math.max(maxLength, key.toString().length());
+		}
 
-    //(print header)
-    System.out.println("-------------------");
-    System.out.println(" MC Tester");
-    System.out.println("-------------------");
-    System.out.println("Options:");
-    //(print keys)
-    for (String key : keys){
-      System.out.print("  -" + key);
-      for (int i=0; i<maxLength-key.length(); i++){
-	System.out.print(" ");
-      }
-      System.out.println("    " + props.getProperty(key));
-    }
-    System.out.println();
-    //--Create MC Class
-    //Not implemented yet
+		//(print header)
+		System.out.println("-------------------");
+		System.out.println(" MC Tester");
+		System.out.println("-------------------");
+		System.out.println("Options:");
+		//(print keys)
+		for (String key : keys){
+			System.out.print("  -" + key);
+			for (int i=0; i<maxLength-key.length(); i++){
+				System.out.print(" ");
+			}
+			System.out.println("    " + props.getProperty(key));
+		}
+		System.out.println();
+		//--Create MC Class
+		//Not implemented yet
 
-    //--Read Data
-    System.out.println("Reading documents ... ");
-    //(get path)
-    dataPath = props.getProperty("path", "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/");
-    if (!new File(dataPath).exists()){
-      System.out.println("ERROR: no such path");
-      System.exit(1);
-    }
-    if (!new File(dataPath).isDirectory()){
-      System.out.println("ERROR: not a directory");
-      System.exit(1);
-    }
+		//--Read Data
+		System.out.println("Reading documents ... ");
+		//(get path)
+		dataPath = props.getProperty("path", "/Users/david/Documents/CS224N/final_project/Dataset/MCTest/");
+		if (!new File(dataPath).exists()){
+			System.out.println("ERROR: no such path");
+			System.exit(1);
+		}
+		if (!new File(dataPath).isDirectory()){
+			System.out.println("ERROR: not a directory");
+			System.exit(1);
+		}
 
-    File train = getData(dataPath);
+		// Read tasks
+		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		List<Task> tasks = TaskReader.read(fileName);
 
-  }
+		// Read answers
+		fileName = dataPath.concat(new String("mc160.train.ans"));
+		System.out.println("Reading gold answers ...");
+		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
+		System.out.println(goldAnswerLists);
+
+		// Do machine comprehension using selected MC system and compare with answer
+		BaselineOne mc = new BaselineOne();
+		Integer correct = 0;
+		Integer all = 0;
+		for (int i=0; i<tasks.size(); i++) {
+			Task task= tasks.get(i);
+			List<String> answers = mc.runMC(task);
+			List<String> goldAnswerList = goldAnswerLists.get(i);
+			for (int j=0; j<answers.size(); j++){
+				if (answers.get(j).equalsIgnoreCase(goldAnswerList.get(j))) {
+					correct += 1;
+				}
+				all += 1;
+			}
+		}
+		System.out.print("Correctly answered ");
+		System.out.print(correct.toString());
+		System.out.print(" out of ");
+		System.out.print(all.toString());
+		System.out.println(" Questions");
+
+		Double accuracy = correct * 100.0/all; 
+		System.out.print("Accuracy:  ");
+		System.out.print(accuracy.toString());
+		System.out.println("%");
+	}
 
 }
