@@ -95,10 +95,11 @@ public class MCTester<SYS extends MCSystem> {
 		fileName = dataPath.concat(new String("mc160.train.ans"));
 		System.out.println("Reading gold answers ...");
 		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
-		System.out.println(goldAnswerLists);
+		//System.out.println(goldAnswerLists);
 
 		// Do machine comprehension using selected MC system and compare with answer
-		BaselineOne mc = new BaselineOne();
+		//BaselineOne mc = new BaselineOne();
+		BaselineTwo mc = new BaselineTwo();
 		Integer correct = 0;
 		Integer all = 0;
 		for (int i=0; i<tasks.size(); i++) {
