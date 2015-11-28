@@ -28,6 +28,8 @@ import java.util.PriorityQueue;
  * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at st * anford.edu)
  */
 
+// to run the script: java -cp "classes:extlib/*" cs224n.tester.MCTester
+
 public class MCTester<SYS extends MCSystem> {
 	private static String dataPath = "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/MCTest/";
 
@@ -99,7 +101,8 @@ public class MCTester<SYS extends MCSystem> {
 
 		// Do machine comprehension using selected MC system and compare with answer
 		//BaselineOne mc = new BaselineOne();
-		BaselineTwo mc = new BaselineTwo();
+		//BaselineTwo mc = new BaselineTwo();
+		CoreferenceResolution mc = new CoreferenceResolution();
 		Integer correct = 0;
 		Integer all = 0;
 		for (int i=0; i<tasks.size(); i++) {

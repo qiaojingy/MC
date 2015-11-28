@@ -2,6 +2,8 @@ package cs224n.MC;
 
 import cs224n.util.Decodable;
 
+import edu.stanford.nlp.pipeline.*;
+
 import java.io.Serializable;
 import java.util.*;
 

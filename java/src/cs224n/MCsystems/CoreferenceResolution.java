@@ -8,23 +8,26 @@ import edu.stanford.nlp.stats.*;
 import java.util.*;
 import java.lang.Math;
 
-public class BaselineTwo implements MCSystem {
+public class CoreferenceResolution implements MCSystem {
 	@Override
 	public List<String> runMC(Task task) {
 		// Read the questions
 		List<Question> questions = task.getQuestions();
 		List<String> passageTokenStrings = task.getPassage().getTokenStrings();
+		List<String> resolvedPassageTokenStrings = CalFeature.doCorefResolution(task.passage.annotation);
 
 		// Answers stores the answer for each question
 		List<String> answers = new ArrayList<String>();
 		
 		// preprocessing, get token positions in passage
 		HashMap<String,List<Integer>> tokenPosi = Util.tokenPosiInPassage(passageTokenStrings);
+		HashMap<String,List<Integer>> resolvedTokenPosi = Util.tokenPosiInPassage(resolvedPassageTokenStrings);
 		
 		// Iterate through each question and find answer
 		for (Question question : questions) {
 			// Get token lists
 			List<String> Q = question.getStemTokenStrings();
+			List<String> resolved_Q = CalFeature.doCorefResolution(question.annotation_stem);
 			List<List<String>> A = question.getOptionsTokenStrings();
 
 			// Calculate IC(w) for w in passage
@@ -34,14 +37,24 @@ public class BaselineTwo implements MCSystem {
 				IC.setCount(key, Math.log(1 + 1.0 / IC.getCount(key)));
 			}
 
+			Counter<String> resolved_IC = new ClassicCounter<String>(resolvedPassageTokenStrings);
+			for (String key : resolved_IC.keySet()) {
+				resolved_IC.setCount(key, Math.log(1 + 1.0 / resolved_IC.getCount(key)));
+			}
+			
 			// Iterate throught options and calculate sw_i
 			List<Double> sw = new ArrayList<Double>();
-			for (List<String> a : A) {
+			for (int i = 0; i < A.size(); i++) {
 				
-				double scoreBaselineOne = CalFeature.calBaselineOneScore(passageTokenStrings,IC,Q,a);
-				double distancePunish = CalFeature.calDistancePunish(passageTokenStrings,tokenPosi,Q,a);
+				double scoreBaselineOne = CalFeature.calBaselineOneScore(passageTokenStrings,IC,Q,A.get(i));
+				double distancePunish = CalFeature.calDistancePunish(passageTokenStrings,tokenPosi,Q,A.get(i));
+				List<String> resolved_a = CalFeature.doCorefResolution(question.annotation_options.get(i));
+				double resolved_scoreBaselineOne = CalFeature.calBaselineOneScore(resolvedPassageTokenStrings,resolved_IC,
+					resolved_Q,resolved_a);
+				double resolved_distancePunish = CalFeature.calDistancePunish(resolvedPassageTokenStrings,resolvedTokenPosi, 
+					resolved_Q,resolved_a);
 
-				sw.add(scoreBaselineOne - distancePunish);
+				sw.add(scoreBaselineOne - distancePunish + resolved_scoreBaselineOne - resolved_distancePunish);
 			}
 			// Find largest sw and add answer
 			double max = Integer.MIN_VALUE;

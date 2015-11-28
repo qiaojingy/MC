@@ -5,7 +5,7 @@ import cs224n.util.Decodable;
 
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.*;
-
+import edu.stanford.nlp.pipeline.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -21,6 +21,7 @@ public class Passage implements Serializable, Decodable {
    * The sentences in this passage
    */
   public final List<CoreMap> sentences;
+  public final Annotation annotation;
   public List<CoreLabel> tokens; 
   private final HashMap<CoreMap,Integer> sentenceToIndex = new HashMap<CoreMap,Integer>();
 
@@ -29,8 +30,9 @@ public class Passage implements Serializable, Decodable {
    *
    * @param sentences The sentences in the passage
    */
-  public Passage(List<CoreMap> sentences){
+  public Passage(List<CoreMap> sentences,Annotation annotation){
     this.sentences = sentences;
+	this.annotation = annotation;
 	int index = 0;
 
 	// initialize sentenceToIndex
