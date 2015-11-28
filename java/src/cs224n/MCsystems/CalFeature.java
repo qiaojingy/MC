@@ -98,10 +98,13 @@ public class CalFeature{
 					CoreMap corefSentence = sentences.get(sentINdx);
 					List<CoreLabel> corefSentenceTokens = corefSentence.get(TokensAnnotation.class);
 					CorefMention reprMent = chain.getRepresentativeMention();
-					for(int i = reprMent.startIndex; i < reprMent.endIndex; i++){
-						CoreLabel matchedLabel = corefSentenceTokens.get(i-1);
-						resolved.add(matchedLabel.word());
+					if(token.index() < reprMent.startIndex || token.index() > reprMent.endIndex){
+						for(int i = reprMent.startIndex; i < reprMent.endIndex; i++){
+							CoreLabel matchedLabel = corefSentenceTokens.get(i-1);
+							resolved.add(matchedLabel.word());
+						}
 					}
+					else resolved.add(token.word());
 				}
 			}
 		}
