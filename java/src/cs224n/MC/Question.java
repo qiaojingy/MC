@@ -4,6 +4,7 @@ import cs224n.util.Decodable;
 
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.pipeline.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -27,6 +28,8 @@ public class Question implements Serializable, Decodable {
   public final List<CoreMap> stem;
   public final QuestionType questionType;
   public final List<CoreMap> options; 
+  public final Annotation annotation_stem;
+  public final List<Annotation> annotation_options;
 
   /**
    * Create a document from an id and a list of sentences.
@@ -35,10 +38,13 @@ public class Question implements Serializable, Decodable {
    * @param id The unique id of the document
    * @param sentences The sentences in the document
    */
-  public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options){
+  public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options, 
+  Annotation annotation_stem, List<Annotation> annotation_options){
     this.questionType = questionType;
     this.stem = stem;
 	this.options = options;
+	this.annotation_stem = annotation_stem;
+	this.annotation_options = annotation_options;
   }
 
   // Return a list of strings representing tokens in the stem
