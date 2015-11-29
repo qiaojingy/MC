@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 /**
- * A document includes the passage itself, the questions with choices and answers
+ * A task includes the passage itself, the questions with choices and answers
  *
  * @author Gabor Angeli (angeli at cs.stanford)
  */
@@ -47,6 +47,14 @@ public class Task implements Serializable, Decodable {
     this.questions = questions;
 	this.author = author;
 	this.time = time;
+  }
+
+  public List<Question> getQuestions() {
+	return questions;
+  }
+
+  public Passage getPassage() {
+	return passage;
   }
 
   /**

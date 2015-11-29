@@ -14,5 +14,5 @@ import java.util.List;
  */
 
 public interface MCSystem {
-  public List<CoreMap> runMC(Task task);
+	public List<String> runMC(Task task);
 }
