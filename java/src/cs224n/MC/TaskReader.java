@@ -28,7 +28,7 @@ public class TaskReader {
 
 			// Prepare to use Stanford CoreNLP to process the string
 			Properties props = new Properties();
-			props.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse");
+			props.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse, dcoref");
 			props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
 			props.put("ner.applyNumericClassifiers", "false");
 			StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
@@ -49,13 +49,13 @@ public class TaskReader {
 				// The string corresponds to the main passage
 				String passageString = terms[2].replaceAll("\\\\newline", " ");
 
-				Annotation annotation = new Annotation(passageString);
+				Annotation annotation_passage = new Annotation(passageString);
 				// run all the selected Annotators on this text
-				pipeline.annotate(annotation);
+				pipeline.annotate(annotation_passage);
 
-				List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+				List<CoreMap> sentences = annotation_passage.get(CoreAnnotations.SentencesAnnotation.class);
 				if (sentences != null && ! sentences.isEmpty()) {
-					passage = new Passage(sentences);
+					passage = new Passage(sentences,annotation_passage);
 				}
 				else {
 					passage = null;
@@ -81,9 +81,9 @@ public class TaskReader {
 					}
 					// Read question stem
 					String questionString = terms[lineIndex].split(": ")[1];
-					annotation = new Annotation(questionString);
-					pipeline.annotate(annotation);
-					List<CoreMap> stem = annotation.get(CoreAnnotations.SentencesAnnotation.class);
+					Annotation annotation_stem = new Annotation(questionString);
+					pipeline.annotate(annotation_stem);
+					List<CoreMap> stem = annotation_stem.get(CoreAnnotations.SentencesAnnotation.class);
 					// Print stem dependency
 					CoreMap sentence = stem.get(0);
 					System.out.println("The question sentences is: ");
@@ -95,12 +95,14 @@ public class TaskReader {
 					System.out.println(graph.toString(SemanticGraph.OutputFormat.LIST));
 					// Read options
 					List<CoreMap> options = new ArrayList<CoreMap>();
+					List<Annotation> annotation_options = new ArrayList<Annotation>();
 					for (int i=1; i<=4; i++){
-						annotation = new Annotation(terms[lineIndex+i]);
-						pipeline.annotate(annotation);
-						options.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
+						Annotation annotation_oneOption = new Annotation(terms[lineIndex+i]);
+						pipeline.annotate(annotation_oneOption);
+						annotation_options.add(annotation_oneOption);
+						options.add(annotation_oneOption.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 					}
-					Question question = new Question(questionType, stem, options);
+					Question question = new Question(questionType, stem, options,annotation_stem,annotation_options);
 					questions.add(question);
 					lineIndex += 5;
 				}

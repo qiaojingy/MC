@@ -4,6 +4,7 @@ import cs224n.util.Decodable;
 
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.ling.*;
+import edu.stanford.nlp.pipeline.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -14,11 +15,45 @@ import java.util.*;
  * @author Gabor Angeli (angeli at cs.stanford)
  */
 public class Question implements Serializable, Decodable {
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
+  
+  
+  public static enum QuestionType {
+	ONE, MULTIPLE
+  }
 
+  /**
+   * The sentences in this document
+   */
+  public final List<CoreMap> stem;
+  public final QuestionType questionType;
+  public final List<CoreMap> options; 
+  public final Annotation annotation_stem;
+  public final List<Annotation> annotation_options;
 
-	public static enum QuestionType {
-		ONE, MULTIPLE
+  /**
+   * Create a document from an id and a list of sentences.
+   * You're not likely to have to use this method.
+   *
+   * @param id The unique id of the document
+   * @param sentences The sentences in the document
+   */
+  public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options, 
+  Annotation annotation_stem, List<Annotation> annotation_options){
+    this.questionType = questionType;
+    this.stem = stem;
+	this.options = options;
+	this.annotation_stem = annotation_stem;
+	this.annotation_options = annotation_options;
+  }
+
+  // Return a list of strings representing tokens in the stem
+  public List<String> getStemTokenStrings() {
+	List<String> stemTokenStrings = new ArrayList<String>();
+	for (CoreMap s : stem) {
+	  for (CoreLabel token : s.get(CoreAnnotations.TokensAnnotation.class)) {
+		stemTokenStrings.add(token.value());
+	  }
 	}
 
 	/**
