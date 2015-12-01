@@ -32,8 +32,11 @@ public class StatementFactory {
 
 	public static List<CoreMap> makeStatements(Question question) {
 		// We will identify these wh words
-		String elements[] = { "what", "who", "why", "when", "how", "where", "which" };
+		String elements[] = { "what", "who", "why", "when", "how", "where", "which"};
 		Set whWords = new HashSet(Arrays.asList(elements));
+
+		CoreMap sentence = question.getStem().get(0);
+		List<CoreMap> options = question.getOptions();
 
 		// Find the wh- word
 		// whToken is the token of the wh word
@@ -41,10 +44,13 @@ public class StatementFactory {
 		CoreLabel whToken = null;
 		for (CoreLabel token : tokens) {
 			if (whWords.contains(token.value().toLowerCase())) {
-				out.println(token.value());
 				whToken = token;
 				break;
 			}
+		}
+
+		if (whToken == null) {
+			return null;
 		}
 
 		// whIWord is the IndexedWord of the wh word
@@ -83,10 +89,10 @@ public class StatementFactory {
 									break;
 								}
 							}
-							if (SubIWord == null) break; 
+							if (subIWord == null) break; 
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
-								StringJoiner joiner = new StringJoiner(" ");
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
+								StringJoiner joiner = new StringJoiner(" ", "", ".");
 								for (int i=0; i<tokens.size(); i++) {
 									if (tokens.get(i) == whToken){
 										i++;
@@ -97,12 +103,12 @@ public class StatementFactory {
 										joiner.add(answer);
 									}
 								}
-								statementStrings.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
 						else if (relation.toString() == "nsubj") {
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
 								StringJoiner joiner = new StringJoiner(" ");
 								for (int i=0; i<tokens.size(); i++) {
 									if (tokens.get(i) == whToken){
@@ -111,14 +117,14 @@ public class StatementFactory {
 									}
 									if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 								}
-								statementStrings.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
 						break;
 
 					case "WP":	
 						for (CoreMap option : options) {
-							answer = option.get(CoreAnnotations.TextAnnotation);
+							answer = option.get(CoreAnnotations.TextAnnotation.class);
 							StringJoiner joiner = new StringJoiner(" ");
 							for (int i=0; i<tokens.size(); i++) {
 								if (tokens.get(i) == whToken){
@@ -127,7 +133,7 @@ public class StatementFactory {
 								}
 								if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 							}
-							statementStrings.add(joiner.value()+".");
+							statementStrings.add(joiner.toString());
 						}
 						break;
 
@@ -137,7 +143,7 @@ public class StatementFactory {
 						relation =edge.getRelation();
 						if (!(relation == null)&(relation.toString() == "nusbj")) {
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
 								StringJoiner joiner = new StringJoiner(" ");
 								for (int i=0; i<tokens.size(); i++) {
 									if (tokens.get(i) == whToken){
@@ -146,7 +152,7 @@ public class StatementFactory {
 									}
 									if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 								}
-								statementString.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
 						break;
@@ -159,7 +165,7 @@ public class StatementFactory {
 				// The wh word is "which"
 			case "which":
 				for (CoreMap option : options) {
-					answer = option.get(CoreAnnotations.TextAnnotation);
+					answer = option.get(CoreAnnotations.TextAnnotation.class);
 					StringJoiner joiner = new StringJoiner(" ");
 					for (int i=0; i<tokens.size(); i++) {
 						if (tokens.get(i) == whToken){
@@ -168,14 +174,13 @@ public class StatementFactory {
 						}
 						if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 					}
-					statementStrings.add(joiner.value()+".");
+					statementStrings.add(joiner.toString());
 				}
 				break;
 
 			case "where":
 				switch (rootPOS) {
 					case "VBP":
-
 					case "VB":
 						relation = graph.getEdge(rootIWord, whIWord).getRelation();
 						if (relation.toString() == "advmod") {
@@ -189,7 +194,7 @@ public class StatementFactory {
 								}
 							}
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
 								StringJoiner joiner = new StringJoiner(" ");
 								int i = 0;
 								for (; i<tokens.size(); i++) {
@@ -210,16 +215,17 @@ public class StatementFactory {
 										if (new IndexedWord(tokens.get(i)).equals(objIWord)) joiner.add(answer);
 									}
 								}
-								statementStrings.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
+						break;
 
 					case "NNP":
 						relation = graph.getEdge(rootIWord, whIWord).getRelation();
 						if (relation.toString() == "advmod") {
 							String a = null;
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
 								StringJoiner joiner = new StringJoiner(" ");
 								for (int i=0; i<tokens.size(); i++) {
 									if (tokens.get(i) == whToken) {
@@ -234,7 +240,7 @@ public class StatementFactory {
 										}
 									}
 								}
-								statementStrings.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
 						break;
@@ -256,7 +262,7 @@ public class StatementFactory {
 						relation = graph.getEdge(rootIWord, whIWord).getRelation();
 						if (relation.toString() == "nsubj") {
 							for (CoreMap option : options) {
-								answer = option.get(CoreAnnotations.TextAnnotation);
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
 								StringJoiner joiner = new StringJoiner(" ");
 								for (CoreLabel token : tokens) {
 									if (token == whToken) joiner.add(answer);
@@ -264,7 +270,7 @@ public class StatementFactory {
 										joiner.add(token.value());
 									}
 								}
-								statementStrings.add(joiner.value()+".");
+								statementStrings.add(joiner.toString());
 							}
 						}
 						break;
@@ -281,7 +287,7 @@ public class StatementFactory {
 				// (if how is followed by many)
 				if (tokens.get(whIWord.index()).value().toLowerCase().equals("many")) {
 					for (CoreMap option : options) {
-						answer = option.get(CoreAnnotations.TextAnnotation);
+						answer = option.get(CoreAnnotations.TextAnnotation.class);
 						StringJoiner joiner = new StringJoiner(" ");
 						int i = 0;
 						for (; i < whIndex - 1; i++) {
@@ -291,7 +297,7 @@ public class StatementFactory {
 						for (i = whIndex + 1; i < tokens.size(); i++) {
 							if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 						}
-						statementStrings.add(joiner.value()+".");
+						statementStrings.add(joiner.toString());
 					}
 					break;
 				}
@@ -309,7 +315,7 @@ public class StatementFactory {
 						}
 						if (subIWord == null) break;
 						for (CoreMap option : options) {
-							answer = option.get(CoreAnnotations.TextAnnotation);
+							answer = option.get(CoreAnnotations.TextAnnotation.class);
 							StringJoiner joiner = new StringJoiner(" ");
 							joiner.add(subIWord.value());
 							int i = 0;
@@ -321,7 +327,7 @@ public class StatementFactory {
 							for (i++; i < tokens.size(); i++) {
 								if (!(tokens.get(i).value().equals("?"))) joiner.add(tokens.get(i).value());
 							}
-							statementStrings.add(joiner.value()+".");
+							statementStrings.add(joiner.toString());
 						}
 						break;
 					default:
@@ -333,7 +339,7 @@ public class StatementFactory {
 				// The wh word is "why" 
 			case "why":
 				for (CoreMap option : options) {
-					answer = option.get(CoreAnnotations.TextAnnotation);
+					answer = option.get(CoreAnnotations.TextAnnotation.class);
 					StringJoiner joiner = new StringJoiner(" ");
 					int i = 0;
 					for (;i < tokens.size(); i++) {
@@ -344,14 +350,13 @@ public class StatementFactory {
 					}
 					joiner.add("because");
 					joiner.add(answer);
-					statementStrings.add(joiner.value()+".");
+					statementStrings.add(joiner.toString());
 				}
 				break;
 
 			default:
 				break;
 		}
-		if (!(joiner == null)) out.println(joiner.toString());
 
 		// Create a CoreNLP pipeline. This line just builds the default pipeline.
 		// In comments we show how you can build a particular pipeline
@@ -360,10 +365,10 @@ public class StatementFactory {
 		props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
 		props.put("ner.applyNumericClassifiers", "false");
 		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
+		System.out.println("Annotating statement strings ......");
 		List<CoreMap> statements = new ArrayList<CoreMap>();
 		for (String statementString : statementStrings) {
-			annotation = new Annotation("What did James pull off?");
+			Annotation annotation = new Annotation(statementString);
 
 			// run all the selected Annotators on this text
 			pipeline.annotate(annotation);

@@ -48,6 +48,14 @@ public class Question implements Serializable, Decodable {
 	this.annotation_options = annotation_options;
   }
 
+	public List<CoreMap> getStem() {
+		return this.stem;
+	}
+
+	public List<CoreMap> getOptions() {
+		return this.options;
+	}
+
 	// Return a list of strings representing tokens in the stem
 	public List<String> getStemTokenStrings() {
 		List<String> stemTokenStrings = new ArrayList<String>();
@@ -61,13 +69,22 @@ public class Question implements Serializable, Decodable {
 
 	// Return a list of tokens in the stem
 	public List<CoreLabel> getStemTokens() {
-		List<CoreLabel> stemTokens = new ArrayList<String>();
+		List<CoreLabel> stemTokens = new ArrayList<CoreLabel>();
 		for (CoreMap s : stem) {
 			for (CoreLabel token : s.get(CoreAnnotations.TokensAnnotation.class)) {
 				stemTokens.add(token);
 			}
 		}
 		return stemTokens;
+	}
+
+	public List<String> getOptionTokenStrings(int a) {
+		CoreMap o = options.get(a);
+		List<String> optionTokenStrings = new ArrayList<String>();
+		for (CoreLabel token : o.get(CoreAnnotations.TokensAnnotation.class)) {
+			optionTokenStrings.add(token.value());
+		}
+		return optionTokenStrings;
 	}
 
 	public List<List<String>> getOptionsTokenStrings() {
@@ -91,6 +108,14 @@ public class Question implements Serializable, Decodable {
 			this.makeStatements();
 		}
 		return this.statements.get(i);
+	}
+
+	public void printStatements() {
+		List<CoreMap> statements = this.getStatements();
+		System.out.println("Statements: ");
+		for (CoreMap statement : statements) {
+			System.out.println(statement.get(CoreAnnotations.TextAnnotation.class));
+		}
 	}
 
 	public List<CoreMap> getStatements() {

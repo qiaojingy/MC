@@ -16,7 +16,8 @@ public class BFeaturizer implements Featurizer {
 	public void initialize() {}
 
 	@Override
-	public List<FeatureValue> featurize(Passage p, int w, Question q, List<String> a) {
+	public List<FeatureValue> featurize(Passage p, int w, Question q, int a) {
+		List<String> answer = q.getOptionTokenStrings(a);
 		CoreMap sentence = p.getSentence(w);
 		List<String> sentenceTokenStrings = new ArrayList<String>();
 		for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
@@ -27,7 +28,7 @@ public class BFeaturizer implements Featurizer {
 		// Calculate S = A_i U Q
 		List<String> S = new ArrayList<String>();
 		S.addAll(Q);
-		S.addAll(a);
+		S.addAll(answer);
 		// Calculate sw_i
 		double score = 0;
 		Counter<String> IC = p.getIC();

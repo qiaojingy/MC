@@ -84,15 +84,6 @@ public class TaskReader {
 					Annotation annotation_stem = new Annotation(questionString);
 					pipeline.annotate(annotation_stem);
 					List<CoreMap> stem = annotation_stem.get(CoreAnnotations.SentencesAnnotation.class);
-					// Print stem dependency
-					CoreMap sentence = stem.get(0);
-					System.out.println("The question sentences is: ");
-					System.out.println(sentence.toString());
-					System.out.println("The question basic dependensies are: ");
-					System.out.println(sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class).toString(SemanticGraph.OutputFormat.LIST));
-					System.out.println("The first sentence collapsed, CC-processed dependencies are: ");
-					SemanticGraph graph = sentence.get(SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation.class);
-					System.out.println(graph.toString(SemanticGraph.OutputFormat.LIST));
 					// Read options
 					List<CoreMap> options = new ArrayList<CoreMap>();
 					List<Annotation> annotation_options = new ArrayList<Annotation>();
@@ -103,6 +94,8 @@ public class TaskReader {
 						options.add(annotation_oneOption.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 					}
 					Question question = new Question(questionType, stem, options,annotation_stem,annotation_options);
+					//make statements
+					question.makeStatements();
 					questions.add(question);
 					lineIndex += 5;
 				}

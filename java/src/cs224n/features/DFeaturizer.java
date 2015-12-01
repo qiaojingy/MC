@@ -4,6 +4,7 @@ import cs224n.MC.*;
 import cs224n.util.*;
 
 import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.ling.*;
 
 import java.util.*;
 import java.lang.Math;
@@ -16,8 +17,8 @@ public class DFeaturizer implements Featurizer {
 	public void initialize() {}
 
 	@Override
-	public List<FeatureValue> featurize(Passage p, int w, Question q, List<String> a) {
-		
+	public List<FeatureValue> featurize(Passage p, int w, Question q, int a) {
+		List<String> answer = q.getOptionTokenStrings(a); 
 		List<String> passageTokenStrings = p.getTokenStrings();
 		List<String> Q = q.getStemTokenStrings();
 		//S_Q = (Q intersects PW) minus U
@@ -28,7 +29,7 @@ public class DFeaturizer implements Featurizer {
 		StopWordsRemover.removeStopWords(SQ_set);
 
 		//S_Ai = ((Ai intersects PW) minus Q) minus U
-		Set<String> Ai_set = new HashSet<String>(a);
+		Set<String> Ai_set = new HashSet<String>(answer);
 		Set<String> SAi_set = new HashSet<String>(Ai_set);
 		SAi_set.retainAll(PW_set);
 		SAi_set.removeAll(Q_set);
