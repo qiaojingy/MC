@@ -26,7 +26,7 @@ import java.util.PriorityQueue;
  * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at st * anford.edu)
  */
 
-public class MCTester<SYS extends MCSystem> {
+public class ClassifierTester<SYS extends MCSystem> {
 	private static String dataPath = "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/MCTest/";
 
 	public static enum DataType {
@@ -45,7 +45,7 @@ public class MCTester<SYS extends MCSystem> {
 	}
 
 
-	public static void main1(String[] args) {
+	public static void main(String[] args) {
 		//--Get Properties
 		Properties props = StringUtils.argsToProperties(args);
 		// (order keys)
@@ -72,27 +72,7 @@ public class MCTester<SYS extends MCSystem> {
 		System.out.println();
 
 		//--Create MC Class
-		System.out.print("Creating model...");
-		//(classname)
-		String systemClass = props.getProperty("model", "BaselineOne");
-		//if (systemClass.equalsIgnoreCase("baselineone")) {
-		//	systemClass = BaselineOne.class.getName();
-		//}
-		MCSystem system;
-		try {
-			//((try loading the class))
-			system = MetaClass.create(systemClass).createInstance();
-		}
-		catch (MetaClass.ClassCreationException e) {
-			//((maybe you forget to include the package))
-			try {
-				system = MetaClass.create("cs224n.MCsystems."+systemClass).createInstance();
-			}
-			catch (MetaClass.ClassCreationException e2) {
-				throw e;
-			}
-		}
-		System.out.println("done");
+		ClassifierBased classifierBased = new ClassifierBased();
 
 		//--Read Data
 		System.out.println("Reading documents ... ");
@@ -110,35 +90,57 @@ public class MCTester<SYS extends MCSystem> {
 			System.exit(1);
 		}
 
-		// Read tasks
+		// Read training tasks
+		System.out.println("Reading training tasks ...");
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
 		List<Task> tasks = TaskReader.read(fileName);
+		fileName = dataPath.concat(new String("mc500.train.tsv"));
+		tasks.addAll(TaskReader.read(fileName));
+		for(Task t:tasks)classifierBased.calTrainingFeatures(t);  // calculating training example features
 
-		// Read answers
-		fileName = dataPath.concat(new String("mc160.train.ans"));
+		// Read training answers
 		System.out.println("Reading gold answers ...");
+		fileName = dataPath.concat(new String("mc160.train.ans"));
 		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
+		fileName = dataPath.concat(new String("mc500.train.ans"));
+		goldAnswerLists.addAll(AnswerReader.read(fileName));
+		classifierBased.setGoldAnswers(goldAnswerLists);
 		//System.out.println(goldAnswerLists);
+		
+		//initializing
+		classifierBased.initialize();
+		
+		//training
+		classifierBased.train();
+		
+		//Read test/dev set
+		String test_or_dev = "dev";
+		System.out.println("Reading " + test_or_dev + "tasks ...");
+		fileName = dataPath.concat(new String("mc160."+test_or_dev+".tsv"));
+		List<Task> test_tasks = TaskReader.read(fileName);
+		fileName = dataPath.concat(new String("mc500."+test_or_dev+".tsv"));
+		test_tasks.addAll(TaskReader.read(fileName));
+		
+		//Read test/dev answers
+		System.out.println("Reading " + test_or_dev + "answers ...");
+		fileName = dataPath.concat(new String("mc160."+test_or_dev+".ans"));
+		List<List<String>> test_goldAnswerLists = AnswerReader.read(fileName);
+		fileName = dataPath.concat(new String("mc500."+test_or_dev+".ans"));
+		test_goldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
-		//BaselineOne mc = new BaselineOne();
 		Integer correct = 0;
 		Integer all = 0;
-		for (int i=0; i<tasks.size(); i++) {
-			Task task= tasks.get(i);
-			//System.out.println(task.normalPrint());
-			List<String> answers = system.runMC(task);
-			List<String> goldAnswerList = goldAnswerLists.get(i);
-			for (int j=0; j<answers.size(); j++){
-				//System.out.format("%d th question: ", j+1);
-				if (answers.get(j).equalsIgnoreCase(goldAnswerList.get(j))) {
-					correct += 1;
-					//System.out.print("Correct!");
-				}
-				//System.out.format("Gold: %s,  Answer: %s %n", goldAnswerList.get(j), answers.get(j));
-				all += 1;
+		for(int i = 0; i < test_tasks.size(); i++){
+			Task task = test_tasks.get(i);
+			List<String> answers = classifierBased.predict(task);
+			List<String> test_goldAnswerList = test_goldAnswerLists.get(i);
+			for(int j = 0; j < answers.size(); j++){
+				if(answers.get(j).equalsIgnoreCase(test_goldAnswerList.get(j)))correct += 1;
 			}
+			all += 1;
 		}
+		
 		System.out.print("Correctly answered ");
 		System.out.print(correct.toString());
 		System.out.print(" out of ");
