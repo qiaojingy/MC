@@ -182,7 +182,9 @@ public class StatementFactory {
 				switch (rootPOS) {
 					case "VBP":
 					case "VB":
-						relation = graph.getEdge(rootIWord, whIWord).getRelation();
+						edge = graph.getEdge(rootIWord, whIWord);
+						if (edge == null) break;
+						relation = edge.getRelation();
 						if (relation.toString() == "advmod") {
 							List<IndexedWord> children =graph.getChildList(rootIWord);
 							IndexedWord objIWord = null;
@@ -221,7 +223,9 @@ public class StatementFactory {
 						break;
 
 					case "NNP":
-						relation = graph.getEdge(rootIWord, whIWord).getRelation();
+						edge = graph.getEdge(rootIWord, whIWord);
+						if (edge == null) break;
+						relation = edge.getRelation();
 						if (relation.toString() == "advmod") {
 							String a = null;
 							for (CoreMap option : options) {
@@ -259,7 +263,9 @@ public class StatementFactory {
 					case "VB":
 					case "VBG":
 					case "VBD":
-						relation = graph.getEdge(rootIWord, whIWord).getRelation();
+						edge = graph.getEdge(rootIWord, whIWord);
+						if (edge == null) break;
+						relation = edge.getRelation();
 						if (relation.toString() == "nsubj") {
 							for (CoreMap option : options) {
 								answer = option.get(CoreAnnotations.TextAnnotation.class);
@@ -307,7 +313,9 @@ public class StatementFactory {
 						List<IndexedWord> children =graph.getChildList(rootIWord);
 						IndexedWord subIWord = null;
 						for (IndexedWord child : children) {
-							relation = graph.getEdge(rootIWord, child).getRelation();
+							edge = graph.getEdge(rootIWord, whIWord);
+							if (edge == null) break;
+							relation = edge.getRelation();
 							if (relation.toString() == "nsubj") {
 								subIWord = child;
 								break;
