@@ -1,0 +1,288 @@
+package cs224n.MC;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+
+
+/* 
+ *
+ * Attention: These codes are from https://gist.github.com/ansjsun/6304960
+ *
+ *
+ */
+
+public class WordEmbeddingsDict {
+
+	private HashMap<String, float[]> wordMap = new HashMap<String, float[]>();
+	private int words;
+	private int size;
+	private int topNSize = 40;
+
+
+	public WordEmbeddingsDict(String dataPath) {
+		loadModel(dataPath);
+	}
+
+
+
+	/**
+	 * Load the model
+	 * 
+	 * @param path -- The path of the model file
+	 *            
+	 * @throws IOException
+	 */
+	public void loadModel(String path) {
+		DataInputStream dis = null;
+		BufferedInputStream bis = null;
+		double len = 0;
+		float vector = 0;
+		try {
+			bis = new BufferedInputStream(new FileInputStream(path));
+			dis = new DataInputStream(bis);
+			// read the number of the words in the dictionary
+			words = Integer.parseInt(readString(dis));
+			// read the size of the word vector
+			size = Integer.parseInt(readString(dis));
+
+			String word;
+			float[] vectors = null;
+			for (int i = 0; i < words; i++) {
+				word = readString(dis);
+				vectors = new float[size];
+				len = 0;
+				for (int j = 0; j < size; j++) {
+					vector = readFloat(dis);
+					len += vector * vector;
+					vectors[j] = (float) vector;
+				}
+				len = Math.sqrt(len);
+
+				for (int j = 0; j < vectors.length; j++) {
+					vectors[j] = (float) (vectors[j] / len);
+				}
+				wordMap.put(word, vectors);
+				//dis.read();
+			}
+			bis.close();
+			dis.close();
+
+		}
+		catch (IOException e) {
+			System.out.println("Error while reading dictionary");
+		}
+	}
+
+	private static final int MAX_SIZE = 50;
+
+
+	/**
+	 * Get the word vector
+	 * 
+	 * @param word
+	 * @return
+	 */
+	public Set<WordEntry> distance(String word) {
+		float[] wordVector = getWordVector(word);
+		if (wordVector == null) {
+			return null;
+		}
+		Set<Entry<String, float[]>> entrySet = wordMap.entrySet();
+		float[] tempVector = null;
+		List<WordEntry> wordEntrys = new ArrayList<WordEntry>(topNSize);
+		String name = null;
+		for (Entry<String, float[]> entry : entrySet) {
+			name = entry.getKey();
+			if (name.equals(word)) {
+				continue;
+			}
+			float dist = 0;
+			tempVector = entry.getValue();
+			for (int i = 0; i < wordVector.length; i++) {
+				dist += wordVector[i] * tempVector[i];
+			}
+			insertTopN(name, dist, wordEntrys);
+		}
+		return new TreeSet<WordEntry>(wordEntrys);
+	}
+
+	/**
+	 * 近义词
+	 * @return 
+	 */
+	public TreeSet<WordEntry> analogy(String word0, String word1, String word2) {
+		float[] wv0 = getWordVector(word0);
+		float[] wv1 = getWordVector(word1);
+		float[] wv2 = getWordVector(word2);
+
+		if (wv1 == null || wv2 == null || wv0 == null) {
+			return null;
+		}
+		float[] wordVector = new float[size];
+		for (int i = 0; i < size; i++) {
+			wordVector[i] = wv1[i] - wv0[i] + wv2[i];
+		}
+		float[] tempVector;
+		String name;
+		List<WordEntry> wordEntrys = new ArrayList<WordEntry>(topNSize);
+		for (Entry<String, float[]> entry : wordMap.entrySet()) {
+			name = entry.getKey();
+			if (name.equals(word0) || name.equals(word1) || name.equals(word2)) {
+				continue;
+			}
+			float dist = 0;
+			tempVector = entry.getValue();
+			for (int i = 0; i < wordVector.length; i++) {
+				dist += wordVector[i] * tempVector[i];
+			}
+			insertTopN(name, dist, wordEntrys);
+		}
+		return new TreeSet<WordEntry>(wordEntrys);
+	}
+
+	private void insertTopN(String name, float score, List<WordEntry> wordsEntrys) {
+		// TODO Auto-generated method stub
+		if (wordsEntrys.size() < topNSize) {
+			wordsEntrys.add(new WordEntry(name, score));
+			return;
+		}
+		float min = Float.MAX_VALUE;
+		int minOffe = 0;
+		for (int i = 0; i < topNSize; i++) {
+			WordEntry wordEntry = wordsEntrys.get(i);
+			if (min > wordEntry.score) {
+				min = wordEntry.score;
+				minOffe = i;
+			}
+		}
+
+		if (score > min) {
+			wordsEntrys.set(minOffe, new WordEntry(name, score));
+		}
+
+	}
+
+	public class WordEntry implements Comparable<WordEntry> {
+		public String name;
+		public float score;
+
+		public WordEntry(String name, float score) {
+			this.name = name;
+			this.score = score;
+		}
+
+		@Override
+		public String toString() {
+			// TODO Auto-generated method stub
+			return this.name + "\t" + score;
+		}
+
+		@Override
+		public int compareTo(WordEntry o) {
+			// TODO Auto-generated method stub
+			if (this.score > o.score) {
+				return -1;
+			} else {
+				return 1;
+			}
+		}
+
+	}
+
+	/**
+	 * get the word vector
+	 * 
+	 * @param word
+	 * @return
+	 */
+	public float[] getWordVector(String word) {
+		return wordMap.get(word);
+	}
+
+	public static float readFloat(InputStream is) throws IOException {
+		byte[] bytes = new byte[4];
+		is.read(bytes);
+		return getFloat(bytes);
+	}
+
+	/**
+	 * read a float number
+	 * 
+	 * @param b
+	 * @return
+	 */
+	public static float getFloat(byte[] b) {
+		int accum = 0;
+		accum = accum | (b[0] & 0xff) << 0;
+		accum = accum | (b[1] & 0xff) << 8;
+		accum = accum | (b[2] & 0xff) << 16;
+		accum = accum | (b[3] & 0xff) << 24;
+		return Float.intBitsToFloat(accum);
+	}
+
+	/**
+	 * read a string
+	 * 
+	 * @param dis
+	 * @return
+	 * @throws IOException
+	 */
+	private static String readString(DataInputStream dis) throws IOException {
+		// TODO Auto-generated method stub
+		byte[] bytes = new byte[MAX_SIZE];
+		byte b = dis.readByte();
+		int i = -1;
+		StringBuilder sb = new StringBuilder();
+		while (b != 32 && b != 10) {
+			i++;
+			bytes[i] = b;
+			b = dis.readByte();
+			if (i == 49) {
+				sb.append(new String(bytes));
+				i = -1;
+				bytes = new byte[MAX_SIZE];
+			}
+		}
+		sb.append(new String(bytes, 0, i + 1));
+		return sb.toString();
+	}
+
+	public int getTopNSize() {
+		return topNSize;
+	}
+
+	public void setTopNSize(int topNSize) {
+		this.topNSize = topNSize;
+	}
+
+	public HashMap<String, float[]> getWordMap() {
+		return wordMap;
+	}
+
+	public int getWords() {
+		return words;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public static void main(String[] args) {
+		WordEmbeddingsDict wordEmbeddingsDict = new WordEmbeddingsDict("/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin");
+		Set<WordEntry> c = wordEmbeddingsDict.distance("apple");
+		for (WordEntry w : c) {
+			System.out.println(w);
+		}
+	}
+
+
+}
