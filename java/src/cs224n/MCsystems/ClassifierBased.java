@@ -10,44 +10,67 @@ import edu.stanford.nlp.stats.*;
 import java.util.*;
 import java.lang.Math;
 
-public class ClassifierBased implements MCSystem {
+public class ClassifierBased{
 	
-	public int[] weights;
-	public List<List<List<FeatureValue>>> features = new List<List<List<FeatureValue>>>();
+	public double[] weights;
+	public int featureDim = 3;
+	public ArrayList<ArrayList<ArrayList<FeatureValue>>> features = new ArrayList<ArrayList<ArrayList<FeatureValue>>>();
 	//features: dim1: i^th training example (p,q,a), dim2: wrt j^th sentence, dim3: features
-	public List<Integer> goldAnswers = new List<Integer>();
+	public ArrayList<Integer> goldAnswers = new ArrayList<Integer>();
 	//correct answers, 0 based, in the same order of (p,q) as specified in variable features
 	public static int numPassage = 0;
-	public static List<Integer> numQuestion = new List<Integer>();
+	public static ArrayList<Integer> numQuestion = new ArrayList<Integer>();
 	
 	// function for prediction: returns the index of the instance (0 based) that maximizes the score
-	// features: row: instances, column: feature values
-	public int predict(int[][] featureMatrix){
-		int maxScore = Integer.MIN_VALUE;
+	// features: row: instances (options for a question), column: feature values
+	public int predictOne(ArrayList<ArrayList<ArrayList<FeatureValue>>> feature_pq){
+		double maxValue_outer = Double.MIN_VALUE;
 		int maxIdx = -1;
-		for(int i = 0; i < featureMatrix.length(); i++){
-			int score = 0;
-			for(int j = 0; j < featureMatrix[0].length(); j++)score += featureMatrix[i][j] * weights[j];
-			if(score > maxScore){
-				maxScore = score;
-				maxIdx = i;
+		for(int a = 0; a < feature_pq.size(); a++){
+			ArrayList<ArrayList<FeatureValue>> feature_pqa = feature_pq.get(a);
+			double maxValue_inner = Double.MIN_VALUE;
+			for(int w = 0; w < feature_pqa.size(); w++){
+				double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),this.weights);
+				if(score > maxValue_inner)maxValue_inner = score;
+			}
+			double score = maxValue_inner;
+			if(score > maxValue_outer){
+				maxValue_outer = score;
+				maxIdx = a;
 			}
 		}
 		return maxIdx;
 	}
 	
-	public int[] train(){
-		//theta[][], 
-		random(theta);
+	public void initialize(){
+		this.weights = new double[featureDim];
+		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random() * 2;  //initialize weights to random value
+	}
+	
+	public void train(){
 		double delta = 0.01;
 		double alpha = 0.1;
-		for(int dim = 0; dim < theta.length(); i++){
-			new_theta1 = theta;
-			new_theta1[dim] += delta;
-			new_theta2 = theta;
-			new_theta2[dim] -= delta;
-			double gradient = (func(new_theta1) - func(new_theta2))/(2*delta);
-			theta[dim] = theta[dim] - alpha * gradient;  // bug HERE
+		double lambda = 0.1;
+		double[] gradient = new double[featureDim];
+		//repeat until convergence
+		while(true){
+			for(int dim = 0; dim < featureDim; dim++){
+				double[] new_theta1 = new double[featureDim];
+				double[] new_theta2 = new double[featureDim];
+				System.arraycopy(this.weights, 0, new_theta1, 0, featureDim);
+				System.arraycopy(this.weights, 0, new_theta2, 0, featureDim);
+				new_theta1[dim] += delta;
+				new_theta2[dim] -= delta;
+				gradient[dim] = (func(lambda,new_theta1) - func(lambda,new_theta2))/(2*delta);
+			}
+			double gradient_norm = 0;
+			for(int dim = 0; dim < featureDim; dim++){  //update theta
+				this.weights[dim] = this.weights[dim] - alpha * gradient[dim];
+				gradient_norm += gradient[dim];
+			}
+			if(gradient_norm < 0.0001)break;
+			System.out.println("gradient norm is " + gradient_norm);
+			System.out.println("Loss is " + func(lambda,this.weights));
 		}
 		//lambda: 0.1 -- 1 -- 10 -- 100
 	}
@@ -60,18 +83,18 @@ public class ClassifierBased implements MCSystem {
 		int ans_counter = 0;
 		for(int p = 0; p < numPassage; p++){
 			for(int q = 0; q < numQuestion.get(p); q++){
-				int maxValue = Integer.MIN_VALUE;
-				List<List<FeatureValue>> feature_pqa = features.get(pq_counter*4 + goldAnswers.get(ans_counter));
-				for(int w = 0; w < features_pqa.size(); w++){
+				double maxValue = Double.MIN_VALUE;
+				ArrayList<ArrayList<FeatureValue>> feature_pqa = features.get(pq_counter*4 + goldAnswers.get(ans_counter));
+				for(int w = 0; w < feature_pqa.size(); w++){
 					double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),theta);
 					if(score > maxValue)maxValue = score;
 				}
 				sum -= maxValue;
-				int maxValue_outer = Integer.MIN_VALUE;
+				double maxValue_outer = Double.MIN_VALUE;
 				for(int a = 0; a < 4; a++){
 					feature_pqa = features.get(pq_counter*4 + a);
-					int maxValue_inner = Integer.MIN_VALUE;
-					for(int w = 0; w < features_pqa.size(); w++){
+					double maxValue_inner = Double.MIN_VALUE;
+					for(int w = 0; w < feature_pqa.size(); w++){
 						double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),theta);
 						if(score > maxValue_inner)maxValue_inner = score;
 					}
@@ -87,8 +110,7 @@ public class ClassifierBased implements MCSystem {
 		return regularization + sum;
 	}
 	
-	@Override
-	public List<String> runMC(Task task) {
+	public void calTrainingFeatures(Task task) {
 		// Read the passage
 		Passage passage = task.getPassage();
 		numPassage++;
@@ -106,8 +128,9 @@ public class ClassifierBased implements MCSystem {
 			List<List<String>> A = question.getOptionsTokenStrings();
 
 			// Iterate throught options and calculate sw_i
-			for (List<String> a : A) {
-				List<List<FeatureValue>> feature_pqa = new List<List<FeatureValue>>();
+			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
+				List<String> a = A.get(a_counter);
+				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
 				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
 				//slidingWindowFeaturizer.featurize(passage, question, a);
 				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
@@ -115,23 +138,102 @@ public class ClassifierBased implements MCSystem {
 				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
-					List<FeatureValue> feature_pqaw = new List<FeatureValue>();
+					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
 					feature_pqaw.add(scoreBaselineOne);
 					feature_pqaw.add(distancePunish);
 					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a).get(0);
+					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
 			}
 		}
-		//System.out.println(answers);
+	}
+	
+	public List<String> predict(Task task){
+		// Read the passage
+		Passage passage = task.getPassage();
+		// Read the questions
+		List<Question> questions = task.getQuestions();
+		// Answers stores the answer for each question
+		List<String> answers = new ArrayList<String>();
+		
+		// Iterate through each question and predict answers
+		for (Question question : questions) {
+			// stores features of each of these four options
+			// dim1: i^th option, dim2: wrt j^th sentence, dim3: features
+			ArrayList<ArrayList<ArrayList<FeatureValue>>> test_features = new ArrayList<ArrayList<ArrayList<FeatureValue>>>();
+			
+			// Get token lists
+			List<List<String>> A = question.getOptionsTokenStrings();
+
+			// Iterate throught options and calculate sw_i
+			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
+				List<String> a = A.get(a_counter);
+				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
+				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
+				//slidingWindowFeaturizer.featurize(passage, question, a);
+				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
+				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
+				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
+				
+				for(int w = 0; w < passage.totalSentenceNum(); w++){
+					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
+					feature_pqaw.add(scoreBaselineOne);
+					feature_pqaw.add(distancePunish);
+					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					feature_pqaw.add(scoreSyntactic);
+					feature_pqa.add(feature_pqaw);
+				}
+				test_features.add(feature_pqa);
+			}
+			int i_ans = predictOne(test_features);
+			String ans = "";
+			switch(i_ans){
+				case 0:
+				ans = "A";
+				break;
+				case 1:
+				ans = "B";
+				break;
+				case 2:
+				ans = "C";
+				break;
+				case 3:
+				ans = "D";
+				break;
+				default:
+				System.out.println("Error when predicting answer. ");
+			}
+			answers.add(ans);
+		}
 		return answers;
 	}
 	
-	public setGoldAnswers(List<Integer> goldAnswers){
-		this.goldAnswers = goldAnswers;
+	public void setGoldAnswers(List<List<String>> goldAnswerLists){
+		//loop through gold answer lists and append them linearly
+		for(int p = 0; p < goldAnswerLists.size(); p++){
+			for(int q = 0; q < goldAnswerLists.get(0).size(); q++){
+				String ans = goldAnswerLists.get(p).get(q);
+				switch(ans){
+					case "A":
+					this.goldAnswers.add(0);
+					break;
+					case "B":
+					this.goldAnswers.add(1);
+					break;
+					case "C":
+					this.goldAnswers.add(2);
+					break;
+					case "D":
+					this.goldAnswers.add(3);
+					break;
+					default:
+					System.out.println("Missing gold answer. ");
+				}
+			}
+		}
 	}
-	
 }
