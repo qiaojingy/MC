@@ -16,4 +16,8 @@ public class FeatureValue {
 	public double getValue() {
 		return value;
 	}
+
+	public String toString() {
+		return this.getName() + "\t" + this.getValue();
+	}
 }
