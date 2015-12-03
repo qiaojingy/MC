@@ -24,11 +24,11 @@ public class ClassifierBased{
 	// function for prediction: returns the index of the instance (0 based) that maximizes the score
 	// features: row: instances (options for a question), column: feature values
 	public int predictOne(ArrayList<ArrayList<ArrayList<FeatureValue>>> feature_pq){
-		double maxValue_outer = Double.MIN_VALUE;
+		double maxValue_outer = 0 - Double.MAX_VALUE;
 		int maxIdx = -1;
 		for(int a = 0; a < feature_pq.size(); a++){
 			ArrayList<ArrayList<FeatureValue>> feature_pqa = feature_pq.get(a);
-			double maxValue_inner = Double.MIN_VALUE;
+			double maxValue_inner = 0 - Double.MAX_VALUE;
 			for(int w = 0; w < feature_pqa.size(); w++){
 				double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),this.weights);
 				if(score > maxValue_inner)maxValue_inner = score;
@@ -44,35 +44,55 @@ public class ClassifierBased{
 	
 	public void initialize(){
 		this.weights = new double[featureDim];
-		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random() * 2;  //initialize weights to random value
+		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random();  //initialize weights to random value
 	}
 	
 	public void train(){
-		double delta = 0.01;
-		double alpha = 0.1;
+		System.out.println("In training function. ");
+		double alpha = 0.00001;
 		double lambda = 0.1;
+		findWList();
+		gradientDescent(lambda,alpha);
+		//lambda: 0.1 -- 1 -- 10 -- 100
+	}
+	
+	public void gradientDescent(double lambda, double alpha){
 		double[] gradient = new double[featureDim];
 		//repeat until convergence
-		while(true){
+		int count = 0;
+		double delta = 0.01;
+		while(count++ < 1000){
 			for(int dim = 0; dim < featureDim; dim++){
+				
+				System.out.print("weights is ");
+				System.out.println(Arrays.toString(this.weights));
+				
 				double[] new_theta1 = new double[featureDim];
 				double[] new_theta2 = new double[featureDim];
 				System.arraycopy(this.weights, 0, new_theta1, 0, featureDim);
 				System.arraycopy(this.weights, 0, new_theta2, 0, featureDim);
 				new_theta1[dim] += delta;
 				new_theta2[dim] -= delta;
+				
+				//System.out.print("modified weights is ");
+				//System.out.println(Arrays.toString(new_theta1));
+				//System.out.println(Arrays.toString(new_theta2));
+				
 				gradient[dim] = (func(lambda,new_theta1) - func(lambda,new_theta2))/(2*delta);
+				//System.out.print("Func change: ");
+				//System.out.println(func(lambda,new_theta1));
+				//System.out.println(func(lambda,new_theta2));
+				//System.out.println(gradient[dim]);
 			}
 			double gradient_norm = 0;
 			for(int dim = 0; dim < featureDim; dim++){  //update theta
 				this.weights[dim] = this.weights[dim] - alpha * gradient[dim];
-				gradient_norm += gradient[dim];
+				gradient_norm += gradient[dim] * gradient[dim];
 			}
-			if(gradient_norm < 0.0001)break;
 			System.out.println("gradient norm is " + gradient_norm);
 			System.out.println("Loss is " + func(lambda,this.weights));
+			if(gradient_norm < 0.0001)break;
 		}
-		//lambda: 0.1 -- 1 -- 10 -- 100
 	}
 	
 	public double func(double lambda, double[] theta){
@@ -83,17 +103,17 @@ public class ClassifierBased{
 		int ans_counter = 0;
 		for(int p = 0; p < numPassage; p++){
 			for(int q = 0; q < numQuestion.get(p); q++){
-				double maxValue = Double.MIN_VALUE;
+				double maxValue = 0 - Double.MAX_VALUE;
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = features.get(pq_counter*4 + goldAnswers.get(ans_counter));
 				for(int w = 0; w < feature_pqa.size(); w++){
 					double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),theta);
 					if(score > maxValue)maxValue = score;
 				}
 				sum -= maxValue;
-				double maxValue_outer = Double.MIN_VALUE;
+				double maxValue_outer = 0 - Double.MAX_VALUE;
 				for(int a = 0; a < 4; a++){
 					feature_pqa = features.get(pq_counter*4 + a);
-					double maxValue_inner = Double.MIN_VALUE;
+					double maxValue_inner = 0 - Double.MAX_VALUE;
 					for(int w = 0; w < feature_pqa.size(); w++){
 						double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),theta);
 						if(score > maxValue_inner)maxValue_inner = score;

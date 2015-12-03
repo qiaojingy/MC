@@ -30,7 +30,7 @@ public class Question implements Serializable, Decodable {
   public final List<CoreMap> options; 
   public final Annotation annotation_stem;
   public final List<Annotation> annotation_options;
-	public List<CoreMap> statements;
+  public List<CoreMap> statements = null;
 
   /**
    * Create a document from an id and a list of sentences.
@@ -107,6 +107,7 @@ public class Question implements Serializable, Decodable {
 		if (statements == null) {
 			this.makeStatements();
 		}
+		System.out.println("Size of statements is " + this.statements.get(i));
 		return this.statements.get(i);
 	}
 
