@@ -34,7 +34,7 @@ public class MCTester<SYS extends MCSystem> {
 	}
 
 	private static List<Task> getData(String dataPath) {
-		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		String fileName = dataPath.concat(new String("mc500.test.tsv"));
 		System.out.print("Reading:  ");
 		System.out.println(fileName);
 		String line = null;
@@ -45,7 +45,7 @@ public class MCTester<SYS extends MCSystem> {
 	}
 
 
-	public static void main1(String[] args) {
+	public static void main(String[] args) {
 		//--Get Properties
 		Properties props = StringUtils.argsToProperties(args);
 		// (order keys)
@@ -111,11 +111,11 @@ public class MCTester<SYS extends MCSystem> {
 		}
 
 		// Read tasks
-		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		String fileName = dataPath.concat(new String("mc160.dev.tsv"));
 		List<Task> tasks = TaskReader.read(fileName);
 
 		// Read answers
-		fileName = dataPath.concat(new String("mc160.train.ans"));
+		fileName = dataPath.concat(new String("mc160.dev.ans"));
 		System.out.println("Reading gold answers ...");
 		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
 		//System.out.println(goldAnswerLists);
