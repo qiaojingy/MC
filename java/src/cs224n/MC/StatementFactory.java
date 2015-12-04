@@ -30,6 +30,7 @@ import java.util.StringJoiner;
 
 public class StatementFactory {
 
+	private static StanfordCoreNLP pipeline;
 	public static List<CoreMap> makeStatements(Question question) {
 		// We will identify these wh words
 		String elements[] = { "what", "who", "why", "when", "how", "where", "which"};
@@ -375,7 +376,7 @@ public class StatementFactory {
 		if(statementStrings.size() == 0){
 			for(CoreMap option:options){
 				answer = option.get(CoreAnnotations.TextAnnotation.class);
-				StringJoiner joiner = new StringJoiner(" ");
+				StringJoiner joiner = new StringJoiner(" ", "", ".");
 				joiner.add(answer);
 				for(int i = 0; i < tokens.size(); i++){
 					if(!(tokens.get(i).value().equals("?")))joiner.add(tokens.get(i).value());
@@ -386,18 +387,19 @@ public class StatementFactory {
 
 		// Create a CoreNLP pipeline. This line just builds the default pipeline.
 		// In comments we show how you can build a particular pipeline
-		Properties props = new Properties();
-		props.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse");
-		props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
-		props.put("ner.applyNumericClassifiers", "false");
-		StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-		System.out.println("Annotating statement strings ......");
+		if (StatementFactory.pipeline == null) {
+			Properties props = new Properties();
+			props.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse");
+			props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+			props.put("ner.applyNumericClassifiers", "false");
+			pipeline = new StanfordCoreNLP(props);
+		}
 		List<CoreMap> statements = new ArrayList<CoreMap>();
 		for (String statementString : statementStrings) {
 			Annotation annotation = new Annotation(statementString);
 
 			// run all the selected Annotators on this text
-			pipeline.annotate(annotation);
+			StatementFactory.pipeline.annotate(annotation);
 			statements.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 		}
 		//if(statements.size() != 4){
