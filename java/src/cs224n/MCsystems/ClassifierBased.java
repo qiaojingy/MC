@@ -27,10 +27,10 @@ public class ClassifierBased implements MCSystem{
 		this.featurizers = new ArrayList<Featurizer>();
 		this.featurizerOnes = new ArrayList<FeaturizerOne>();
 
-		Featurizer bFeaturizer = new BFeaturizer();
-		this.featurizers.add(bFeaturizer);
-		Featurizer dFeaturizer = new DFeaturizer();
-		this.featurizers.add(dFeaturizer);
+		FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
+		this.featurizerOnes.add(bFeaturizer);
+		FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
+		this.featurizerOnes.add(dFeaturizer);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
 		Featurizer bWFeaturizer = new BWFeaturizer();
