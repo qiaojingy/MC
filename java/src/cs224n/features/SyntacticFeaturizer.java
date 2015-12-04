@@ -13,6 +13,11 @@ import java.lang.Math;
 public class SyntacticFeaturizer implements Featurizer {
 
 	private static final String FEATURE_NAME = "Syntactic";
+	private static final int FEATURE_DIM = 1;
+
+	public int getDim() {
+		return this.FEATURE_DIM;
+	}
 
 	@Override
 	public void initialize() {}

@@ -11,6 +11,11 @@ import java.lang.Math;
 public class DistanceBasedFeaturizer implements FeaturizerOne {
 
 	private static final String FEATURE_NAME = "DistanceBased";
+	private static final int FEATURE_DIM = 1;
+
+	public int getDim() {
+		return this.FEATURE_DIM;
+	}
 
 	@Override
 	public void initialize() {}

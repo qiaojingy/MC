@@ -9,6 +9,11 @@ import java.util.*;
 public class SlidingWindowFeaturizer implements FeaturizerOne {
 
 	private static final String FEATURE_NAME = "SlidingWindow";
+	private static final int FEATURE_DIM = 1;
+
+	public int getDim() {
+		return this.FEATURE_DIM;
+	}
 
 	@Override
 	public void initialize() {}
