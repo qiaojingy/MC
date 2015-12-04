@@ -94,7 +94,7 @@ public class ClassifierBased implements MCSystem{
 		// learning rate
 		double alpha = 0.001;
 		// weight of l2 term
-		double lambda = 0.5;
+		double lambda = 0.05;
 		//findWList();
 		gradientDescent(lambda,alpha);
 		//lambda: 0.1 -- 1 -- 10 -- 100
