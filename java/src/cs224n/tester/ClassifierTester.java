@@ -94,16 +94,16 @@ public class ClassifierTester<SYS extends MCSystem> {
 		System.out.println("Reading training tasks ...");
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
 		List<Task> tasks = TaskReader.read(fileName);
-		fileName = dataPath.concat(new String("mc500.train.tsv"));
-		tasks.addAll(TaskReader.read(fileName));
+		//fileName = dataPath.concat(new String("mc500.train.tsv"));
+		//tasks.addAll(TaskReader.read(fileName));
 		for(Task t:tasks)classifierBased.calTrainingFeatures(t);  // calculating training example features
 
 		// Read training answers
 		System.out.println("Reading gold answers ...");
 		fileName = dataPath.concat(new String("mc160.train.ans"));
 		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
-		fileName = dataPath.concat(new String("mc500.train.ans"));
-		goldAnswerLists.addAll(AnswerReader.read(fileName));
+		//fileName = dataPath.concat(new String("mc500.train.ans"));
+		//goldAnswerLists.addAll(AnswerReader.read(fileName));
 		classifierBased.setGoldAnswers(goldAnswerLists);
 		//System.out.println(goldAnswerLists);
 		
@@ -120,15 +120,15 @@ public class ClassifierTester<SYS extends MCSystem> {
 		System.out.println("Reading " + test_or_dev + " tasks ...");
 		fileName = dataPath.concat(new String("mc160."+test_or_dev+".tsv"));
 		List<Task> test_tasks = TaskReader.read(fileName);
-		fileName = dataPath.concat(new String("mc500."+test_or_dev+".tsv"));
-		test_tasks.addAll(TaskReader.read(fileName));
+		//fileName = dataPath.concat(new String("mc500."+test_or_dev+".tsv"));
+		//test_tasks.addAll(TaskReader.read(fileName));
 		
 		//Read test/dev answers
 		System.out.println("Reading " + test_or_dev + " answers ...");
 		fileName = dataPath.concat(new String("mc160."+test_or_dev+".ans"));
 		List<List<String>> test_goldAnswerLists = AnswerReader.read(fileName);
-		fileName = dataPath.concat(new String("mc500."+test_or_dev+".ans"));
-		test_goldAnswerLists.addAll(AnswerReader.read(fileName));
+		//fileName = dataPath.concat(new String("mc500."+test_or_dev+".ans"));
+		//test_goldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
 		Integer correct = 0;

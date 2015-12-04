@@ -13,7 +13,7 @@ import java.lang.Math;
 public class ClassifierBased{
 	
 	public double[] weights;
-	public int featureDim = 3;
+	public int featureDim = 2;
 	public ArrayList<ArrayList<ArrayList<FeatureValue>>> features = new ArrayList<ArrayList<ArrayList<FeatureValue>>>();
 	//features: dim1: i^th training example (p,q,a), dim2: wrt j^th sentence, dim3: features
 	public ArrayList<Integer> goldAnswers = new ArrayList<Integer>();
@@ -49,9 +49,9 @@ public class ClassifierBased{
 	
 	public void train(){
 		System.out.println("In training function. ");
-		double alpha = 0.00001;
+		double alpha = 0.001;
 		double lambda = 0.1;
-		findWList();
+		//findWList();
 		gradientDescent(lambda,alpha);
 		//lambda: 0.1 -- 1 -- 10 -- 100
 	}
@@ -161,9 +161,9 @@ public class ClassifierBased{
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
 					feature_pqaw.add(scoreBaselineOne);
 					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
+					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					//feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
@@ -202,9 +202,9 @@ public class ClassifierBased{
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
 					feature_pqaw.add(scoreBaselineOne);
 					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
+					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					//feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				test_features.add(feature_pqa);
