@@ -13,7 +13,7 @@ import java.lang.Math;
 public class ClassifierBased implements MCSystem{
 	
 	public double[] weights;
-	public int featureDim = 2;
+	public int featureDim = 3;
 	public ArrayList<ArrayList<ArrayList<FeatureValue>>> features = new ArrayList<ArrayList<ArrayList<FeatureValue>>>();
 	//features: dim1: i^th training example (p,q,a), dim2: wrt j^th sentence, dim3: features
 	public ArrayList<Integer> goldAnswers = new ArrayList<Integer>();

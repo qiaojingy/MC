@@ -130,18 +130,18 @@ public class MCTester<SYS extends MCSystem> {
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		fileName = dataPath.concat(new String("mc160.dev.tsv"));
+		fileName = dataPath.concat(new String("mc160.test.tsv"));
 		List<Task> testTasks = TaskReader.read(fileName);
 
-		fileName = dataPath.concat(new String("mc500.dev.tsv"));
+		fileName = dataPath.concat(new String("mc500.test.tsv"));
 		testTasks.addAll(TaskReader.read(fileName));
 
 		// Read answers
 		System.out.println("Reading gold answers ...");
-		fileName = dataPath.concat(new String("mc160.dev.ans"));
+		fileName = dataPath.concat(new String("mc160.test.ans"));
 		List<List<String>> testGoldAnswerLists = AnswerReader.read(fileName);
 
-		fileName = dataPath.concat(new String("mc500.dev.ans"));
+		fileName = dataPath.concat(new String("mc500.test.ans"));
 		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer

@@ -31,6 +31,7 @@ import java.util.StringJoiner;
 public class StatementFactory {
 
 	private static StanfordCoreNLP pipeline;
+	private static int count = 0;
 	public static List<CoreMap> makeStatements(Question question) {
 		// We will identify these wh words
 		String elements[] = { "what", "who", "why", "when", "how", "where", "which"};
@@ -416,6 +417,8 @@ public class StatementFactory {
 			System.out.println("In statementFactory: Size of statement is "+statements.size());
 			System.exit(1);
 		}
+		System.out.println(count);
+		count++;
 		return statements;
 	}
 
