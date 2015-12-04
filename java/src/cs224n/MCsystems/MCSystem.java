@@ -14,5 +14,6 @@ import java.util.List;
  */
 
 public interface MCSystem {
+	public void train(List<Task> tasks);
 	public List<String> runMC(Task task);
 }

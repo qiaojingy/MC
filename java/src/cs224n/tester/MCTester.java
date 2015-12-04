@@ -110,23 +110,36 @@ public class MCTester<SYS extends MCSystem> {
 			System.exit(1);
 		}
 
-		// Read tasks
-		String fileName = dataPath.concat(new String("mc160.dev.tsv"));
-		List<Task> tasks = TaskReader.read(fileName);
+		// Read training tasks
+		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		List<Task> trainingTasks = TaskReader.read(fileName);
+
+		fileName = dataPath.concat(new String("mc500.train.tsv"));
+		trainingTasks.addAll(TaskReader.read(fileName));
+
+		// Train the MC system
+		system.train(trainingTasks);
+
+		// Read test tasks
+		fileName = dataPath.concat(new String("mc160.dev.tsv"));
+		List<Task> testTasks = TaskReader.read(fileName);
+
+		fileName = dataPath.concat(new String("mc500.dev.tsv"));
+		testTasks.addAll(TaskReader.read(fileName));
 
 		// Read answers
-		fileName = dataPath.concat(new String("mc160.dev.ans"));
 		System.out.println("Reading gold answers ...");
+		fileName = dataPath.concat(new String("mc160.dev.ans"));
 		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
-		//System.out.println(goldAnswerLists);
+
+		fileName = dataPath.concat(new String("mc500.dev.ans"));
+		goldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
-		//BaselineOne mc = new BaselineOne();
 		Integer correct = 0;
 		Integer all = 0;
-		for (int i=0; i<tasks.size(); i++) {
-			Task task= tasks.get(i);
-			//System.out.println(task.normalPrint());
+		for (int i=0; i<testTasks.size(); i++) {
+			Task task= testTasks.get(i);
 			List<String> answers = system.runMC(task);
 			List<String> goldAnswerList = goldAnswerLists.get(i);
 			for (int j=0; j<answers.size(); j++){

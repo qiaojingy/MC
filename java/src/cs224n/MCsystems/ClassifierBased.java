@@ -235,7 +235,7 @@ public class ClassifierBased{
 	public void setGoldAnswers(List<List<String>> goldAnswerLists){
 		//loop through gold answer lists and append them linearly
 		for(int p = 0; p < goldAnswerLists.size(); p++){
-			for(int q = 0; q < goldAnswerLists.get(0).size(); q++){
+			for(int q = 0; q < goldAnswerLists.get(p).size(); q++){
 				String ans = goldAnswerLists.get(p).get(q);
 				switch(ans){
 					case "A":

@@ -10,8 +10,11 @@ import edu.stanford.nlp.stats.*;
 import java.util.*;
 import java.lang.Math;
 
-public class FeatureTester implements MCSystem {
+public class FeatureBaseline implements MCSystem {
 	@Override
+	public void train(List<Task> tasks) {
+	}
+
 	public List<String> runMC(Task task) {
 		// Read the passage
 		Passage passage = task.getPassage();
