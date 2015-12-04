@@ -111,14 +111,23 @@ public class MCTester<SYS extends MCSystem> {
 		}
 
 		// Read training tasks
+		System.out.println("Reading training tasks ...");
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
 		List<Task> trainingTasks = TaskReader.read(fileName);
 
 		fileName = dataPath.concat(new String("mc500.train.tsv"));
 		trainingTasks.addAll(TaskReader.read(fileName));
-
+		
+		// Read training answers
+		System.out.println("Reading gold answers ...");
+		fileName = dataPath.concat(new String("mc160.train.ans"));
+		List<List<String>> trainingGoldAnswerLists = AnswerReader.read(fileName);
+		
+		fileName = dataPath.concat(new String("mc500.train.ans"));
+		trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
+		
 		// Train the MC system
-		system.train(trainingTasks);
+		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
 		fileName = dataPath.concat(new String("mc160.dev.tsv"));
@@ -130,10 +139,10 @@ public class MCTester<SYS extends MCSystem> {
 		// Read answers
 		System.out.println("Reading gold answers ...");
 		fileName = dataPath.concat(new String("mc160.dev.ans"));
-		List<List<String>> goldAnswerLists = AnswerReader.read(fileName);
+		List<List<String>> testGoldAnswerLists = AnswerReader.read(fileName);
 
 		fileName = dataPath.concat(new String("mc500.dev.ans"));
-		goldAnswerLists.addAll(AnswerReader.read(fileName));
+		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
 		Integer correct = 0;
@@ -141,10 +150,10 @@ public class MCTester<SYS extends MCSystem> {
 		for (int i=0; i<testTasks.size(); i++) {
 			Task task= testTasks.get(i);
 			List<String> answers = system.runMC(task);
-			List<String> goldAnswerList = goldAnswerLists.get(i);
+			List<String> testGoldAnswerList = testGoldAnswerLists.get(i);
 			for (int j=0; j<answers.size(); j++){
 				//System.out.format("%d th question: ", j+1);
-				if (answers.get(j).equalsIgnoreCase(goldAnswerList.get(j))) {
+				if (answers.get(j).equalsIgnoreCase(testGoldAnswerList.get(j))) {
 					correct += 1;
 					//System.out.print("Correct!");
 				}

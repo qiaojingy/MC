@@ -177,10 +177,10 @@ public class Question implements Serializable, Decodable {
 	}
 
 	public CoreMap getStatement(int i) {
-		if (statements == null) {
+		if (this.statements == null) {
 			this.makeStatements();
 		}
-		System.out.println("Size of statements is " + this.statements.get(i));
+		System.out.println("In question: Size of statements is " + this.statements.size());
 		return this.statements.get(i);
 	}
 

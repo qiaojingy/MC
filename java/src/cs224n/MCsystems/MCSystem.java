@@ -14,6 +14,6 @@ import java.util.List;
  */
 
 public interface MCSystem {
-	public void train(List<Task> tasks);
+	public void train(List<Task> tasks,List<List<String>> goldAnswerLists);
 	public List<String> runMC(Task task);
 }
