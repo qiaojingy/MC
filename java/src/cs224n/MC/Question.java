@@ -180,6 +180,7 @@ public class Question implements Serializable, Decodable {
 		if (statements == null) {
 			this.makeStatements();
 		}
+		System.out.println("Size of statements is " + this.statements.get(i));
 		return this.statements.get(i);
 	}
 

@@ -68,6 +68,7 @@ public class StatementFactory {
 		String answer;
 
 		List<String> statementStrings = new ArrayList<String>();
+		boolean parsable = true;
 
 		switch (whIWord.value().toLowerCase()) {
 			// The wh word is "what"
@@ -157,6 +158,7 @@ public class StatementFactory {
 						}
 						break;
 					default:
+						parsable = false;
 						break;
 				}
 				break;
@@ -250,6 +252,7 @@ public class StatementFactory {
 						break;
 
 					default:
+						parsable = false;
 						break;
 				}
 				break;
@@ -281,6 +284,7 @@ public class StatementFactory {
 						}
 						break;
 					default:
+						parsable = false;
 						break;
 				}
 				break;
@@ -339,6 +343,7 @@ public class StatementFactory {
 						}
 						break;
 					default:
+						parsable = false;
 						break;
 				}
 
@@ -363,7 +368,20 @@ public class StatementFactory {
 				break;
 
 			default:
+				parsable = false;
 				break;
+		}
+		
+		if(statementStrings.size() == 0){
+			for(CoreMap option:options){
+				answer = option.get(CoreAnnotations.TextAnnotation.class);
+				StringJoiner joiner = new StringJoiner(" ");
+				joiner.add(answer);
+				for(int i = 0; i < tokens.size(); i++){
+					if(!(tokens.get(i).value().equals("?")))joiner.add(tokens.get(i).value());
+				}
+				statementStrings.add(joiner.toString());
+			}
 		}
 
 		// Create a CoreNLP pipeline. This line just builds the default pipeline.
@@ -382,6 +400,10 @@ public class StatementFactory {
 			pipeline.annotate(annotation);
 			statements.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 		}
+		//if(statements.size() != 4){
+		//	System.out.println("Size of statement is "+statements.size());
+		//	System.exit(1);
+		//}
 		return statements;
 	}
 

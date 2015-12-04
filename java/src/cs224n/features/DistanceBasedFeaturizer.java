@@ -52,6 +52,7 @@ public class DistanceBasedFeaturizer implements FeaturizerOne {
 				}
 			}
 			features.add(new FeatureValue(FEATURE_NAME, (double) min/(passageTokenStrings.size()-1)));
+			
 			return features;
 		}
 	}
