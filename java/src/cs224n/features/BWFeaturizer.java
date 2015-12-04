@@ -11,7 +11,12 @@ import java.util.*;
 public class BWFeaturizer implements Featurizer {
 
 	private static final String FEATURE_NAME = "BW";
-	private static WordEmbeddingsDict dict; 
+	private static final int FEATURE_DIM = 2;
+	private WordEmbeddingsDict dict; 
+
+	public int getDim() {
+		return this.FEATURE_DIM;
+	}
 
 	public BWFeaturizer(WordEmbeddingsDict dict) {
 		this.dict = dict;
