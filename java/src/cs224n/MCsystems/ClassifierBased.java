@@ -185,9 +185,9 @@ public class ClassifierBased implements MCSystem{
 					Featurizer dFeaturizer = new DFeaturizer();
 					FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
+					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					//feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
@@ -230,9 +230,9 @@ public class ClassifierBased implements MCSystem{
 					Featurizer dFeaturizer = new DFeaturizer();
 					FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
+					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					//feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				test_features.add(feature_pqa);
