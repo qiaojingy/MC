@@ -17,6 +17,10 @@ public class BWFeaturizer implements Featurizer {
 	public int getDim() {
 		return this.FEATURE_DIM;
 	}
+	
+	public BWFeaturizer() {
+		this(new WordEmbeddingsDict());
+	}
 
 	public BWFeaturizer(WordEmbeddingsDict dict) {
 		this.dict = dict;
@@ -48,8 +52,8 @@ public class BWFeaturizer implements Featurizer {
 		}
 
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
-		features.add(new FeatureValue(FEATURE_NAME+" ", fp));
-		features.add(new FeatureValue(FEATURE_NAME+" ", fm));
+		features.add(new FeatureValue(FEATURE_NAME+"_FP", fp));
+		features.add(new FeatureValue(FEATURE_NAME+"_FM", fm));
 		return features;
 	}
 

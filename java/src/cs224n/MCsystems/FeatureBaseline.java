@@ -12,7 +12,7 @@ import java.lang.Math;
 
 public class FeatureBaseline implements MCSystem {
 	@Override
-	public void train(List<Task> tasks) {
+	public void train(List<Task> tasks, List<List<String>> goldAnswerList) {
 	}
 
 	public List<String> runMC(Task task) {

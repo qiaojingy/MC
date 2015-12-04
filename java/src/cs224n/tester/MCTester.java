@@ -72,7 +72,7 @@ public class MCTester<SYS extends MCSystem> {
 		System.out.println();
 
 		//--Create MC Class
-		System.out.print("Creating model...");
+		System.out.println("Creating MC System...");
 		//(classname)
 		String systemClass = props.getProperty("model", "BaselineOne");
 		//if (systemClass.equalsIgnoreCase("baselineone")) {

@@ -118,7 +118,7 @@ public class Passage implements Serializable, Decodable {
 
 			for (int i=0; i<size; i++) {
 				fwp_w[i] = 0;
-				fwm_w[i] = 1;
+				fwm_w[i] = (float) 1e30;
 			}
 
 			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
