@@ -10,7 +10,7 @@ import edu.stanford.nlp.stats.*;
 import java.util.*;
 import java.lang.Math;
 
-public class ClassifierBased{
+public class ClassifierBased implements MCSystem{
 	
 	public double[] weights;
 	public int featureDim = 2;
@@ -29,10 +29,15 @@ public class ClassifierBased{
 		for(int a = 0; a < feature_pq.size(); a++){
 			ArrayList<ArrayList<FeatureValue>> feature_pqa = feature_pq.get(a);
 			double maxValue_inner = 0 - Double.MAX_VALUE;
+			int maxIdx_inner = -1;
 			for(int w = 0; w < feature_pqa.size(); w++){
 				double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),this.weights);
-				if(score > maxValue_inner)maxValue_inner = score;
+				if(score > maxValue_inner){
+					maxValue_inner = score;
+					maxIdx_inner = w;
+				}
 			}
+			//System.out.println(maxIdx_inner);
 			double score = maxValue_inner;
 			if(score > maxValue_outer){
 				maxValue_outer = score;
@@ -47,8 +52,24 @@ public class ClassifierBased{
 		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random();  //initialize weights to random value
 	}
 	
-	public void train(){
-		System.out.println("In training function. ");
+	@Override
+	public void train(List<Task> tasks,List<List<String>> goldAnswerLists){
+		
+		//collecting features of training examples
+		System.out.println("Calculating features. ");
+		for(Task t:tasks)calTrainingFeatures(t);
+		
+		//collecting label of training examples
+		System.out.println("Setting labels. ");
+		setGoldAnswers(goldAnswerLists);
+		
+		//initializing weights to random values
+		System.out.println("Initializing classifier. ");
+		initialize();
+		
+		//training
+		System.out.println("Training. ");
+		
 		double alpha = 0.001;
 		double lambda = 0.1;
 		//findWList();
@@ -151,19 +172,22 @@ public class ClassifierBased{
 			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
 				List<String> a = A.get(a_counter);
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
-				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
-				//slidingWindowFeaturizer.featurize(passage, question, a);
-				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
-				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
-				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
+				//FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
+				//FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
+				//FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
+				//FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
+					Featurizer bFeaturizer = new BFeaturizer();
+					FeatureValue scoreBaselineOne = bFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(scoreBaselineOne);
+					Featurizer dFeaturizer = new DFeaturizer();
+					FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(distancePunish);
-					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					//feature_pqaw.add(scoreSyntactic);
+					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
@@ -171,7 +195,8 @@ public class ClassifierBased{
 		}
 	}
 	
-	public List<String> predict(Task task){
+	@Override
+	public List<String> runMC(Task task){
 		// Read the passage
 		Passage passage = task.getPassage();
 		// Read the questions
@@ -192,19 +217,22 @@ public class ClassifierBased{
 			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
 				List<String> a = A.get(a_counter);
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
-				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
-				//slidingWindowFeaturizer.featurize(passage, question, a);
-				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
-				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
-				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
+				//FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
+				//FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
+				//FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
+				//FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
+					Featurizer bFeaturizer = new BFeaturizer();
+					FeatureValue scoreBaselineOne = bFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(scoreBaselineOne);
+					Featurizer dFeaturizer = new DFeaturizer();
+					FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
 					feature_pqaw.add(distancePunish);
-					//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					//FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					//feature_pqaw.add(scoreSyntactic);
+					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
+					feature_pqaw.add(scoreSyntactic);
 					feature_pqa.add(feature_pqaw);
 				}
 				test_features.add(feature_pqa);

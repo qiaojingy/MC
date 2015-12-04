@@ -402,10 +402,10 @@ public class StatementFactory {
 			StatementFactory.pipeline.annotate(annotation);
 			statements.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 		}
-		//if(statements.size() != 4){
-		//	System.out.println("Size of statement is "+statements.size());
-		//	System.exit(1);
-		//}
+		if(statements.size() != 4){
+			System.out.println("In statementFactory: Size of statement is "+statements.size());
+			System.exit(1);
+		}
 		return statements;
 	}
 
