@@ -30,7 +30,9 @@ public class Question implements Serializable, Decodable {
   public final List<CoreMap> options; 
   public final Annotation annotation_stem;
   public final List<Annotation> annotation_options;
-  public List<CoreMap> statements = null;
+	public List<CoreMap> statements;
+	public List<float[]> fap;
+	public List<float[]> fam;
 
   /**
    * Create a document from an id and a list of sentences.
@@ -97,6 +99,77 @@ public class Question implements Serializable, Decodable {
 			optionsTokenStrings.add(optionTokenStrings);
 		}
 		return optionsTokenStrings;
+	}
+
+	public void calculateFa(WordEmbeddingsDict dict) {
+		int size = dict.getSize();
+		float[] fap_q = new float[size]; 
+		float[] fam_q = new float[size]; 
+		
+		for (int i=0; i<size; i++) {
+			fap_q[i] = 0;
+			fam_q[i] = 1;
+		}
+
+		for (String stemTokenString : this.getStemTokenStrings()) {
+			float[] v = dict.getWordVector(stemTokenString);
+			if (v == null) continue;
+			for (int i=0; i<size; i++) {
+				fap_q[i] = fap_q[i] + v[i];
+				fam_q[i] = fam_q[i] * v[i];
+			}
+		}
+		this.fap = new ArrayList<float[]>();
+		this.fam = new ArrayList<float[]>();
+
+		for (List<String> optionTokenStrings : this.getOptionsTokenStrings()) {
+			float[] fap_all = new float[size];
+			float[] fam_all = new float[size];
+			for (int i=0; i<size; i++) {
+				fap_all[i] = fap_q[i];
+				fam_all[i] = fam_q[i];
+			}
+			for (String optionTokenString : optionTokenStrings) {
+				float[] v = dict.getWordVector(optionTokenString);
+				if (v == null) continue;
+				for (int i=0; i<size; i++) {
+					fap_all[i] = fap_all[i] + v[i];
+					fam_all[i] = fam_all[i] * v[i];
+				}
+			}
+			float len_p = 0;
+			float len_m = 0;
+			for (int i=0; i<size; i++) {
+				len_p += fap_all[i] * fap_all[i];
+				len_m += fam_all[i] * fam_all[i];
+			}
+			len_p = (float) Math.sqrt(len_p);
+			len_m = (float) Math.sqrt(len_m);
+
+			for (int i=0; i<size; i++) {
+				fap_all[i] = (float) (fap_all[i]/len_p);
+				fam_all[i] = (float) (fam_all[i]/len_m);
+			}
+
+			this.fap.add(fap_all);
+			this.fam.add(fam_all);
+		}
+
+	}
+
+
+	public float[] getFap(WordEmbeddingsDict dict, int a) {
+		if (this.fap == null) {
+			this.calculateFa(dict);
+		}
+		return this.fap.get(a);
+	}
+
+	public float[] getFam(WordEmbeddingsDict dict, int a) {
+		if (this.fam == null) {
+			this.calculateFa(dict);
+		}
+		return this.fam.get(a);
 	}
 
 	public void makeStatements() {

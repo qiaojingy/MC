@@ -42,6 +42,7 @@ public class WordEmbeddingsDict {
 	 * @throws IOException
 	 */
 	public void loadModel(String path) {
+		System.out.println("Loading word embedding model ......");
 		DataInputStream dis = null;
 		BufferedInputStream bis = null;
 		double len = 0;
@@ -278,9 +279,40 @@ public class WordEmbeddingsDict {
 
 	public static void main(String[] args) {
 		WordEmbeddingsDict wordEmbeddingsDict = new WordEmbeddingsDict("/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin");
+		int numEntries = 10; 
+		System.out.println("The word vector of 'apple'");
+		float[] a = wordEmbeddingsDict.getWordVector("apple");
+		System.out.printf("Length = %d\n", a.length);
+		for (int m=0; m < a.length; m++) {
+			System.out.print(a[m]);
+			System.out.print(" ");
+		}
+		System.out.println("Words that are close to 'apple'");
 		Set<WordEntry> c = wordEmbeddingsDict.distance("apple");
+		int i = 0;
 		for (WordEntry w : c) {
 			System.out.println(w);
+			i = i + 1;
+			if (i >=10) break;
+		}
+		System.out.println("The word vector of 'China'");
+		System.out.println(wordEmbeddingsDict.getWordVector("China"));
+		System.out.println("Words that are close to 'China'");
+		c = wordEmbeddingsDict.distance("China");
+		i = 0; 
+		for (WordEntry w : c) {
+			System.out.println(w);
+			i = i + 1;
+			if (i >=10) break;
+		}
+		System.out.println("The word vector of 'temple'");
+		System.out.println(wordEmbeddingsDict.getWordVector("temple"));
+		System.out.println("Words that are close to temple");
+		c = wordEmbeddingsDict.distance("temple");
+		for (WordEntry w : c) {
+			System.out.println(w);
+			i = i + 1;
+			if (i >=10) break;
 		}
 	}
 

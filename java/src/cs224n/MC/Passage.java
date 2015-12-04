@@ -27,6 +27,8 @@ public class Passage implements Serializable, Decodable {
 	public Map<String, List<Integer>> tokenPositions;
 	private final HashMap<CoreMap,Integer> sentenceToIndex = new HashMap<CoreMap,Integer>();
 	public final Annotation annotation;
+	public List<float[]> fwp;
+	public List<float[]> fwm;
 
 	/**
 	 * Create a passage from a list of sentences(of type CoreMap).
@@ -103,6 +105,64 @@ public class Passage implements Serializable, Decodable {
 			}
 		}
 		return tokenPositions;
+	}
+
+	public void calculateFw(WordEmbeddingsDict dict) {
+		int size = dict.getSize();
+		this.fwp = new ArrayList<float[]>(); 
+		this.fwm = new ArrayList<float[]>(); 
+		
+		for (CoreMap sentence : this.sentences) {
+			float[] fwp_w = new float[size];
+			float[] fwm_w = new float[size];
+
+			for (int i=0; i<size; i++) {
+				fwp_w[i] = 0;
+				fwm_w[i] = 1;
+			}
+
+			for (CoreLabel token : sentence.get(CoreAnnotations.TokensAnnotation.class)) {
+				float[] v = dict.getWordVector(token.value());
+				if (v == null) continue;
+				for (int i=0; i<size; i++) {
+					fwp_w[i] = fwp_w[i] + v[i];
+					fwm_w[i] = fwm_w[i] * v[i];
+				}
+			}
+			float len_p = 0;
+			float len_m = 0;
+			for (int i=0; i<size; i++) {
+				len_p += fwp_w[i] * fwp_w[i];
+				len_m += fwm_w[i] * fwm_w[i];
+			}
+			len_p = (float) Math.sqrt(len_p);
+			len_m = (float) Math.sqrt(len_m);
+
+			for (int i=0; i<size; i++) {
+				fwp_w[i] = (float) (fwp_w[i]/len_p);
+				fwm_w[i] = (float) (fwm_w[i]/len_m);
+			}
+
+			this.fwp.add(fwp_w);
+			this.fwm.add(fwm_w);
+
+		}
+
+	}
+
+
+	public float[] getFwp(WordEmbeddingsDict dict, int w) {
+		if (this.fwp == null) {
+			this.calculateFw(dict);
+		}
+		return this.fwp.get(w);
+	}
+
+	public float[] getFwm(WordEmbeddingsDict dict, int w) {
+		if (this.fwm == null) {
+			this.calculateFw(dict);
+		}
+		return this.fwm.get(w);
 	}
 			
 			

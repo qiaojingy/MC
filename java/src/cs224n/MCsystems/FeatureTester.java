@@ -36,6 +36,7 @@ public class FeatureTester implements MCSystem {
 				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
 				double distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0).getValue();
 				sw.add(scoreBaselineOne - distancePunish);
+				//sw.add(scoreBaselineOne);
 			}
 			// Find largest sw and add answer
 			double max = Integer.MIN_VALUE;
