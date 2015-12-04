@@ -10,6 +10,10 @@ import java.lang.Math;
 
 public class BaselineOne implements MCSystem {
 	@Override
+	public void train(List<Task> tasks, List<List<String>> answers) {
+	}
+	
+	@Override
 	public List<String> runMC(Task task) {
 		// Read the questions
 		List<Question> questions = task.getQuestions();

@@ -115,34 +115,35 @@ public class MCTester<SYS extends MCSystem> {
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
 		List<Task> trainingTasks = TaskReader.read(fileName);
 
-		//fileName = dataPath.concat(new String("mc500.train.tsv"));
-		//trainingTasks.addAll(TaskReader.read(fileName));
+		fileName = dataPath.concat(new String("mc500.train.tsv"));
+		trainingTasks.addAll(TaskReader.read(fileName));
 		
 		// Read training answers
 		System.out.println("Reading gold answers ...");
 		fileName = dataPath.concat(new String("mc160.train.ans"));
 		List<List<String>> trainingGoldAnswerLists = AnswerReader.read(fileName);
 		
-		//fileName = dataPath.concat(new String("mc500.train.ans"));
-		//trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
+		fileName = dataPath.concat(new String("mc500.train.ans"));
+		trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
 		
 		// Train the MC system
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		fileName = dataPath.concat(new String("mc160.dev.tsv"));
+		String dev_or_test = "dev";
+		fileName = dataPath.concat(new String("mc160."+dev_or_test+".tsv"));
 		List<Task> testTasks = TaskReader.read(fileName);
 
-		//fileName = dataPath.concat(new String("mc500.dev.tsv"));
-		//testTasks.addAll(TaskReader.read(fileName));
+		fileName = dataPath.concat(new String("mc500."+dev_or_test+".tsv"));
+		testTasks.addAll(TaskReader.read(fileName));
 
 		// Read answers
 		System.out.println("Reading gold answers ...");
-		fileName = dataPath.concat(new String("mc160.dev.ans"));
+		fileName = dataPath.concat(new String("mc160."+dev_or_test+".ans"));
 		List<List<String>> testGoldAnswerLists = AnswerReader.read(fileName);
 
-		//fileName = dataPath.concat(new String("mc500.dev.ans"));
-		//testGoldAnswerLists.addAll(AnswerReader.read(fileName));
+		fileName = dataPath.concat(new String("mc500."+dev_or_test+".ans"));
+		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
 		Integer correct = 0;
