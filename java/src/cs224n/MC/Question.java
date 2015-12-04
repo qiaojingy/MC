@@ -178,9 +178,12 @@ public class Question implements Serializable, Decodable {
 
 	public CoreMap getStatement(int i) {
 		if (this.statements == null) {
+			System.out.println("Making statements");
 			this.makeStatements();
 		}
-		System.out.println("In question: Size of statements is " + this.statements.size());
+		if (this.statements == null) {
+			System.out.println("null indeed");
+		}
 		return this.statements.get(i);
 	}
 

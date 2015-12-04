@@ -50,9 +50,11 @@ public class StatementFactory {
 			}
 		}
 
+		List<String> statementStrings = new ArrayList<String>();
 		if (whToken == null) {
-			return null;
 		}
+
+		else {
 
 		// whIWord is the IndexedWord of the wh word
 		IndexedWord whIWord = new IndexedWord(whToken);
@@ -68,7 +70,6 @@ public class StatementFactory {
 		SemanticGraphEdge edge;
 		String answer;
 
-		List<String> statementStrings = new ArrayList<String>();
 		boolean parsable = true;
 
 		switch (whIWord.value().toLowerCase()) {
@@ -372,10 +373,12 @@ public class StatementFactory {
 				parsable = false;
 				break;
 		}
+
+		}
 		
-		if(statementStrings.size() == 0){
+		if (statementStrings.size() == 0) {
 			for(CoreMap option:options){
-				answer = option.get(CoreAnnotations.TextAnnotation.class);
+				String answer = option.get(CoreAnnotations.TextAnnotation.class);
 				StringJoiner joiner = new StringJoiner(" ", "", ".");
 				joiner.add(answer);
 				for(int i = 0; i < tokens.size(); i++){
@@ -383,6 +386,10 @@ public class StatementFactory {
 				}
 				statementStrings.add(joiner.toString());
 			}
+		}
+		if (statementStrings.size() == 0) {
+			System.out.println("statement string size = 0");
+			System.exit(1);
 		}
 
 		// Create a CoreNLP pipeline. This line just builds the default pipeline.
@@ -401,6 +408,9 @@ public class StatementFactory {
 			// run all the selected Annotators on this text
 			StatementFactory.pipeline.annotate(annotation);
 			statements.add(annotation.get(CoreAnnotations.SentencesAnnotation.class).get(0));
+		}
+		if (statements == null) {
+			System.out.println("null in factory");
 		}
 		if(statements.size() != 4){
 			System.out.println("In statementFactory: Size of statement is "+statements.size());
