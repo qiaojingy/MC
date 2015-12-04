@@ -72,7 +72,7 @@ public class MCTester<SYS extends MCSystem> {
 		System.out.println();
 
 		//--Create MC Class
-		System.out.print("Creating model...");
+		System.out.println("Creating MC System...");
 		//(classname)
 		String systemClass = props.getProperty("model", "BaselineOne");
 		//if (systemClass.equalsIgnoreCase("baselineone")) {
@@ -130,18 +130,18 @@ public class MCTester<SYS extends MCSystem> {
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		fileName = dataPath.concat(new String("mc160.test.tsv"));
+		fileName = dataPath.concat(new String("mc160.dev.tsv"));
 		List<Task> testTasks = TaskReader.read(fileName);
 
-		fileName = dataPath.concat(new String("mc500.test.tsv"));
+		fileName = dataPath.concat(new String("mc500.dev.tsv"));
 		testTasks.addAll(TaskReader.read(fileName));
 
 		// Read answers
 		System.out.println("Reading gold answers ...");
-		fileName = dataPath.concat(new String("mc160.test.ans"));
+		fileName = dataPath.concat(new String("mc160.dev.ans"));
 		List<List<String>> testGoldAnswerLists = AnswerReader.read(fileName);
 
-		fileName = dataPath.concat(new String("mc500.test.ans"));
+		fileName = dataPath.concat(new String("mc500.dev.ans"));
 		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer

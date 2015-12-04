@@ -113,7 +113,7 @@ public class ClassifierTester<SYS extends MCSystem> {
 		
 		//training
 		System.out.println("Training.");
-		classifierBased.train();
+		classifierBased.train(tasks, goldAnswerLists);
 		
 		//Read test/dev set
 		String test_or_dev = "dev";
@@ -135,7 +135,7 @@ public class ClassifierTester<SYS extends MCSystem> {
 		Integer all = 0;
 		for(int i = 0; i < test_tasks.size(); i++){
 			Task task = test_tasks.get(i);
-			List<String> answers = classifierBased.predict(task);
+			List<String> answers = classifierBased.runMC(task);
 			List<String> test_goldAnswerList = test_goldAnswerLists.get(i);
 			for(int j = 0; j < answers.size(); j++){
 				if(answers.get(j).equalsIgnoreCase(test_goldAnswerList.get(j)))correct += 1;

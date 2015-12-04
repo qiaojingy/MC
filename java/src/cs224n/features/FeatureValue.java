@@ -18,6 +18,6 @@ public class FeatureValue {
 	}
 
 	public String toString() {
-		return this.getName() + "\t" + this.getValue();
+		return this.getName() + ": " + this.getValue();
 	}
 }

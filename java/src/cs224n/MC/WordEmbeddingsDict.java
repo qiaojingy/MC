@@ -32,6 +32,11 @@ public class WordEmbeddingsDict {
 		loadModel(dataPath);
 	}
 
+	public WordEmbeddingsDict() {
+		this("/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin");
+	}
+
+
 
 
 	/**

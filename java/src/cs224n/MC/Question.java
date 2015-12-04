@@ -108,7 +108,7 @@ public class Question implements Serializable, Decodable {
 		
 		for (int i=0; i<size; i++) {
 			fap_q[i] = 0;
-			fam_q[i] = 1;
+			fam_q[i] = (float) 1e30;
 		}
 
 		for (String stemTokenString : this.getStemTokenStrings()) {
@@ -146,6 +146,15 @@ public class Question implements Serializable, Decodable {
 			len_p = (float) Math.sqrt(len_p);
 			len_m = (float) Math.sqrt(len_m);
 
+			if (len_m == (double) 0) {
+				System.out.println("isNaN");
+				System.out.println(len_m);
+				for (int m=0; m<fam_all.length; m++) {
+					System.out.print(fam_all[m]);
+					System.out.print("*");
+				}
+				System.exit(1);
+			}
 			for (int i=0; i<size; i++) {
 				fap_all[i] = (float) (fap_all[i]/len_p);
 				fam_all[i] = (float) (fam_all[i]/len_m);

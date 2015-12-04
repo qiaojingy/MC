@@ -33,10 +33,13 @@ public class ClassifierBased implements MCSystem{
 		this.featurizers.add(dFeaturizer);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
+		Featurizer bWFeaturizer = new BWFeaturizer();
+		this.featurizers.add(bWFeaturizer);
 
 		this.featureDim = 0;
 		for (Featurizer featurizer : this.featurizers) this.featureDim += featurizer.getDim();
 		for (FeaturizerOne featurizerOne : this.featurizerOnes) this.featureDim += featurizerOne.getDim();
+		System.out.println(this.featureDim);
 
 	}
 	
@@ -91,7 +94,7 @@ public class ClassifierBased implements MCSystem{
 		// learning rate
 		double alpha = 0.001;
 		// weight of l2 term
-		double lambda = 0.1;
+		double lambda = 0.5;
 		//findWList();
 		gradientDescent(lambda,alpha);
 		//lambda: 0.1 -- 1 -- 10 -- 100
@@ -103,10 +106,13 @@ public class ClassifierBased implements MCSystem{
 		int count = 0;
 		double delta = 0.01;
 		while(count++ < 1000){
-			for(int dim = 0; dim < featureDim; dim++){
-				
+			if (count%20 == 0) {
 				System.out.print("weights is ");
 				System.out.println(Arrays.toString(this.weights));
+				System.out.println("Loss is " + func(lambda,this.weights));
+			}
+			for(int dim = 0; dim < featureDim; dim++){
+				
 				
 				double[] new_theta1 = new double[featureDim];
 				double[] new_theta2 = new double[featureDim];
@@ -130,8 +136,9 @@ public class ClassifierBased implements MCSystem{
 				this.weights[dim] = this.weights[dim] - alpha * gradient[dim];
 				gradient_norm += gradient[dim] * gradient[dim];
 			}
-			System.out.println("gradient norm is " + gradient_norm);
-			System.out.println("Loss is " + func(lambda,this.weights));
+			if (count%20 == 0) {
+				System.out.println("gradient norm is " + gradient_norm);
+			}
 			if(gradient_norm < 0.0001)break;
 		}
 	}
@@ -207,6 +214,7 @@ public class ClassifierBased implements MCSystem{
 						List<FeatureValue> featureValues = featurizerOne.featurize(passage, question, a);
 						feature_pqaw.addAll(featureValues);
 					}
+					//System.out.println(feature_pqaw);
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
