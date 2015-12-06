@@ -54,7 +54,8 @@ public class SyntacticFeaturizer implements Featurizer {
 		List<String> commonDependencyList = new ArrayList<String>(statementDependencyList);
 		commonDependencyList.retainAll(sentenceDependencyList);
 		//System.out.println(commonDependencyList);
-		features.add(new FeatureValue(FEATURE_NAME+"_One", commonDependencyList.size()));
+		if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME+"_One", -commonDependencyList.size()));
+		else features.add(new FeatureValue(FEATURE_NAME+"_One", commonDependencyList.size()));
 
 
 		return features;

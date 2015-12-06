@@ -56,6 +56,10 @@ public class BWFeaturizer implements Featurizer {
 		}
 
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
+		if (q.isNegation()) {
+			fp = -fp;
+			fm = -fm;
+		}
 		features.add(new FeatureValue(FEATURE_NAME+"_FP", fp));
 		features.add(new FeatureValue(FEATURE_NAME+"_FM", fm));
 		return features;

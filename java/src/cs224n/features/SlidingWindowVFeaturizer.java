@@ -77,6 +77,7 @@ public class SlidingWindowVFeaturizer implements FeaturizerOne {
 			}
 		}
 
+		if (q.isNegation()) maxScore = -maxScore;
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		features.add(new FeatureValue(FEATURE_NAME, maxScore));
 		return features;

@@ -27,14 +27,22 @@ public class ClassifierBased implements MCSystem{
 		this.featurizers = new ArrayList<Featurizer>();
 		this.featurizerOnes = new ArrayList<FeaturizerOne>();
 
-		FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
-		this.featurizerOnes.add(bFeaturizer);
-		FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
-		this.featurizerOnes.add(dFeaturizer);
+		//FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
+		//this.featurizerOnes.add(bFeaturizer);
+		FeaturizerOne bLFeaturizer = new SlidingWindowLFeaturizer();
+		this.featurizerOnes.add(bLFeaturizer);
+		//FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
+		//this.featurizerOnes.add(dFeaturizer);
+		FeaturizerOne dLFeaturizer = new DistanceBasedLFeaturizer();
+		this.featurizerOnes.add(dLFeaturizer);
+		//Featurizer bFeaturizer_w = new BFeaturizer();
+		//this.featurizers.add(bFeaturizer_w);
+		//Featurizer dFeaturizer_w = new DFeaturizer();
+		//this.featurizers.add(dFeaturizer_w);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
-		Featurizer bWFeaturizer = new BWFeaturizer();
-		this.featurizers.add(bWFeaturizer);
+		//Featurizer bWFeaturizer = new BWFeaturizer();
+		//this.featurizers.add(bWFeaturizer);
 
 		this.featureDim = 0;
 		System.out.println("Using features: ");

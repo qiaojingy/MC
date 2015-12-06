@@ -65,9 +65,12 @@ public class TaskReaderTester {
 
 		// Read tasks
 		System.out.println("Reading tasks ...");
-		String fileName = dataPath.concat(new String("mc500.test.tsv"));
+		String fileName = dataPath.concat(new String("mc160.test.tsv"));
 		List<Task> tasks = TaskReader.read(fileName);
-		System.out.println(tasks.get(5).normalPrint());
+		Question q = tasks.get(6).getQuestions().get(1);
+		System.out.println(q.getStemLemmaStrings());
+		System.out.println(q.getStemTokenStrings());
+		System.out.println(q.isNegation());
 	}
 
 }

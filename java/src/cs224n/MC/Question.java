@@ -15,40 +15,51 @@ import java.util.*;
  * @author Gabor Angeli (angeli at cs.stanford)
  */
 public class Question implements Serializable, Decodable {
-  private static final long serialVersionUID = 1L;
-  
-  
-  public static enum QuestionType {
-	ONE, MULTIPLE
-  }
+	private static final long serialVersionUID = 1L;
 
-  /**
-   * The sentences in this document
-   */
-  public final List<CoreMap> stem;
-  public final QuestionType questionType;
-  public final List<CoreMap> options; 
-  public final Annotation annotation_stem;
-  public final List<Annotation> annotation_options;
+
+	public static enum QuestionType {
+		ONE, MULTIPLE
+	}
+
+	/**
+	 * The sentences in this document
+	 */
+	public final List<CoreMap> stem;
+	public final QuestionType questionType;
+	public final List<CoreMap> options; 
+	public final Annotation annotation_stem;
+	public final List<Annotation> annotation_options;
+	public boolean negation;
 	public List<CoreMap> statements;
 	public List<float[]> fap;
 	public List<float[]> fam;
 
-  /**
-   * Create a document from an id and a list of sentences.
-   * You're not likely to have to use this method.
-   *
-   * @param id The unique id of the document
-   * @param sentences The sentences in the document
-   */
-  public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options, 
-  Annotation annotation_stem, List<Annotation> annotation_options){
-    this.questionType = questionType;
-    this.stem = stem;
-	this.options = options;
-	this.annotation_stem = annotation_stem;
-	this.annotation_options = annotation_options;
-  }
+	/**
+	 * Create a document from an id and a list of sentences.
+	 * You're not likely to have to use this method.
+	 *
+	 * @param id The unique id of the document
+	 * @param sentences The sentences in the document
+	 */
+	public Question(QuestionType questionType, List<CoreMap> stem, List<CoreMap> options, 
+			Annotation annotation_stem, List<Annotation> annotation_options){
+		this.questionType = questionType;
+		this.stem = stem;
+		this.options = options;
+		this.annotation_stem = annotation_stem;
+		this.annotation_options = annotation_options;
+		this.isNegation();
+
+		boolean neg = false; 
+		boolean wh = false; 
+		for (String s : this.getStemTokenStrings()) {
+			if (s.equals("not") || s.equals("n't")) neg = true;
+			if (s.equals("how") || s.equals("why")) wh = true;
+		}
+		if (neg && !wh) this.negation = true;
+		else this.negation = false;
+	}
 
 	public List<CoreMap> getStem() {
 		return this.stem;
@@ -56,6 +67,10 @@ public class Question implements Serializable, Decodable {
 
 	public List<CoreMap> getOptions() {
 		return this.options;
+	}
+
+	public boolean isNegation() {
+		return this.negation;
 	}
 
 	// Return a list of strings representing tokens in the stem
@@ -67,6 +82,16 @@ public class Question implements Serializable, Decodable {
 			}
 		}
 		return stemTokenStrings;
+	}
+
+	public List<String> getStemLemmaStrings() {
+		List<String> stemLemmaStrings = new ArrayList<String>();
+		for (CoreMap s : stem) {
+			for (CoreLabel token : s.get(CoreAnnotations.TokensAnnotation.class)) {
+				stemLemmaStrings.add(token.get(CoreAnnotations.LemmaAnnotation.class));
+			}
+		}
+		return stemLemmaStrings;
 	}
 
 	// Return a list of tokens in the stem
@@ -89,6 +114,15 @@ public class Question implements Serializable, Decodable {
 		return optionTokenStrings;
 	}
 
+	public List<CoreLabel> getOptionTokens(int a) {
+		CoreMap o = options.get(a);
+		List<CoreLabel> optionTokens = new ArrayList<CoreLabel>();
+		for (CoreLabel token : o.get(CoreAnnotations.TokensAnnotation.class)) {
+			optionTokens.add(token);
+		}
+		return optionTokens;
+	}
+
 	public List<List<String>> getOptionsTokenStrings() {
 		List<List<String>> optionsTokenStrings = new ArrayList<List<String>>();
 		for (CoreMap o : options) {
@@ -105,7 +139,7 @@ public class Question implements Serializable, Decodable {
 		int size = dict.getSize();
 		float[] fap_q = new float[size]; 
 		float[] fam_q = new float[size]; 
-		
+
 		for (int i=0; i<size; i++) {
 			fap_q[i] = 0;
 			fam_q[i] = (float) 1e30;

@@ -52,7 +52,8 @@ public class DFeaturizer implements Featurizer {
 
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		if (SQ_set.size() == 0 || SAi_set.size() == 0) {
-			features.add(new FeatureValue(FEATURE_NAME, 1));
+			if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME, 1));
+			else features.add(new FeatureValue(FEATURE_NAME, 1));
 			return features;
 		}
 		else {
@@ -67,7 +68,8 @@ public class DFeaturizer implements Featurizer {
 					}
 				}
 			}
-			features.add(new FeatureValue(FEATURE_NAME, min/(sentenceTokenStrings.size()-1)));
+			if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME, -min/(sentenceTokenStrings.size()-1)));
+			else features.add(new FeatureValue(FEATURE_NAME, min/(sentenceTokenStrings.size()-1)));
 			return features;
 		}
 	}

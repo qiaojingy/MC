@@ -3,12 +3,13 @@ package cs224n.features;
 import cs224n.MC.*;
 
 import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.ling.*;
 
 import java.util.*;
 
-public class SlidingWindowFeaturizer implements FeaturizerOne {
+public class SlidingWindowLFeaturizer implements FeaturizerOne {
 
-	private static final String FEATURE_NAME = "SlidingWindow";
+	private static final String FEATURE_NAME = "SlidingWindowL";
 	private static final int FEATURE_DIM = 1;
 
 	public int getDim() {
@@ -25,35 +26,39 @@ public class SlidingWindowFeaturizer implements FeaturizerOne {
 	@Override
 	public List<FeatureValue> featurize(Passage p, Question q, List<String> a) {
 		
-		List<String> passageTokenStrings = p.getTokenStrings();
-		List<String> Q = q.getStemTokenStrings();
+		List<String> passageLemmaStrings = p.getLemmaStrings();
+		List<String> Q = q.getStemLemmaStrings();
 		// Calculate S = A_i U Q
 		List<String> S = new ArrayList<String>();
 		S.addAll(Q);
-		S.addAll(a);
+		for (int i=0; i<4; i++) {
+			if (q.getOptionTokenStrings(i).equals(a)) {
+				for (CoreLabel token : q.getOptionTokens(i)) S.add(token.get(CoreAnnotations.LemmaAnnotation.class));
+			}
+		}
 		// Calculate sw_i
 		int S_size = S.size();
 		double score = 0;
 		double maxScore = 0;
-		Counter<String> IC = p.getIC();
-		for (int j=0; j<passageTokenStrings.size()-S.size()+1; j++) {
+		Counter<String> lemmaIC = p.getLemmaIC();
+		for (int j=0; j<passageLemmaStrings.size()-S.size()+1; j++) {
 			if (j == 0) {
 				for (int w=0; w<S_size; w++) {
-					String token = passageTokenStrings.get(j+w);
+					String token = passageLemmaStrings.get(j+w);
 					if (S.contains(token)) {
-						score += IC.getCount(token);
+						score += lemmaIC.getCount(token);
 					}
 				}
 				maxScore = score;
 			}
 			else {
-				String token = passageTokenStrings.get(j-1);
+				String token = passageLemmaStrings.get(j-1);
 				if (S.contains(token)){
-					score -= IC.getCount(passageTokenStrings.get(j-1));
+					score -= lemmaIC.getCount(passageLemmaStrings.get(j-1));
 				}
-				token = passageTokenStrings.get(j+S_size-1);
+				token = passageLemmaStrings.get(j+S_size-1);
 				if (S.contains(token)){
-					score += IC.getCount(passageTokenStrings.get(j+S_size-1));
+					score += lemmaIC.getCount(passageLemmaStrings.get(j+S_size-1));
 				}
 				if (score > maxScore) {
 					maxScore = score;
@@ -61,8 +66,8 @@ public class SlidingWindowFeaturizer implements FeaturizerOne {
 			}
 		}
 
-		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		if (q.isNegation()) maxScore = -maxScore;
+		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		features.add(new FeatureValue(FEATURE_NAME, maxScore));
 		return features;
 	}
