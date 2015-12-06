@@ -78,7 +78,9 @@ public class ClassifierBased implements MCSystem{
 	
 	public void initialize(){
 		this.weights = new double[featureDim];
-		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random();  //initialize weights to random value
+		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random() * 100;  //initialize weights to random value
+		System.out.println("w initialized to");
+		System.out.println(Arrays.toString(this.weights));
 	}
 	
 	@Override
@@ -99,25 +101,62 @@ public class ClassifierBased implements MCSystem{
 		//training
 		System.out.println("Training. ");
 		// learning rate
-		double alpha = 0.001;
+		double alpha = 0.0001;
 		// weight of l2 term
-		double lambda = 0.1;
-		//findWList();
-		gradientDescent(lambda,alpha);
+		double lambda = 10;
+		// EM, loop until convergence
+		double[] old_weights = new double[featureDim];
+		int count = 0;
+		while(count++ < 1000){
+			System.out.println("######Iteration " + count + "#######");
+			System.arraycopy(this.weights,0,old_weights,0,featureDim);
+			System.out.println("Finding wList according to weights: ");
+			System.out.println(Arrays.toString(this.weights));
+			
+			List<Integer> wList = findWList();
+			System.out.println("wList is ");
+			System.out.println(Arrays.toString(wList.toArray()));
+			gradientDescent(lambda,alpha,wList);
+			double diffNorm = MatrixUtils.diffNorm(old_weights,this.weights);
+			if(diffNorm < 0.001)break;
+		}
 		//lambda: 0.1 -- 1 -- 10 -- 100
 	}
 	
-	public void gradientDescent(double lambda, double alpha){
+	public List<Integer> findWList(){
+		List<Integer> wList = new ArrayList<Integer>();
+		int counter = 0;
+		for(int p = 0; p < numPassage; p++){
+			for(int q = 0; q < numQuestion.get(p); q++){
+				double maxValue = 0 - Double.MAX_VALUE;
+				int maxIdx = -1;
+				ArrayList<ArrayList<FeatureValue>> feature_pqa = features.get(counter*4 + goldAnswers.get(counter));
+				for(int w = 0; w < feature_pqa.size(); w++){
+					double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),this.weights);
+					if(score > maxValue){
+						maxValue = score;
+						maxIdx = w;
+					}
+				}
+				wList.add(maxIdx);
+				counter++;
+			}
+		}
+		return wList;
+	}
+	
+	public void gradientDescent(double lambda, double alpha,List<Integer> wList){
 		double[] gradient = new double[featureDim];
 		//repeat until convergence
 		int count = 0;
-		double delta = 0.01;
-		while(count++ < 2000){
+		double delta = 0.001;
+		while(/*count < 1000*/true){
+			count++;
 			if (count%20 == 0) {
 				System.out.format("%dth iteration", count);
 				System.out.print("weights is ");
 				System.out.println(Arrays.toString(this.weights));
-				System.out.println("Loss is " + func(lambda,this.weights));
+				System.out.println("Loss is " + func(lambda,this.weights,wList));
 			}
 			for(int dim = 0; dim < featureDim; dim++){
 				
@@ -133,7 +172,7 @@ public class ClassifierBased implements MCSystem{
 				//System.out.println(Arrays.toString(new_theta1));
 				//System.out.println(Arrays.toString(new_theta2));
 				
-				gradient[dim] = (func(lambda,new_theta1) - func(lambda,new_theta2))/(2*delta);
+				gradient[dim] = (func(lambda,new_theta1,wList) - func(lambda,new_theta2,wList))/(2*delta);
 				//System.out.print("Func change: ");
 				//System.out.println(func(lambda,new_theta1));
 				//System.out.println(func(lambda,new_theta2));
@@ -147,11 +186,11 @@ public class ClassifierBased implements MCSystem{
 			if (count%20 == 0) {
 				System.out.println("gradient norm is " + gradient_norm);
 			}
-			if(gradient_norm < 0.0001)break;
+			if(gradient_norm < 0.001)break;
 		}
 	}
 	
-	public double func(double lambda, double[] theta){
+	public double func(double lambda, double[] theta,List<Integer> wList){
 		double regularization = lambda * MatrixUtils.vectorMultiplication(theta,theta);
 		int n = goldAnswers.size();
 		double sum = 0.0;
@@ -159,13 +198,8 @@ public class ClassifierBased implements MCSystem{
 		int ans_counter = 0;
 		for(int p = 0; p < numPassage; p++){
 			for(int q = 0; q < numQuestion.get(p); q++){
-				double maxValue = 0 - Double.MAX_VALUE;
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = features.get(pq_counter*4 + goldAnswers.get(ans_counter));
-				for(int w = 0; w < feature_pqa.size(); w++){
-					double score = MatrixUtils.fVectorMultiplication(feature_pqa.get(w),theta);
-					if(score > maxValue)maxValue = score;
-				}
-				sum -= maxValue;
+				sum -= MatrixUtils.fVectorMultiplication(feature_pqa.get(wList.get(pq_counter)),theta);
 				double maxValue_outer = 0 - Double.MAX_VALUE;
 				for(int a = 0; a < 4; a++){
 					feature_pqa = features.get(pq_counter*4 + a);
@@ -210,12 +244,13 @@ public class ClassifierBased implements MCSystem{
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					for (Featurizer featurizer : this.featurizers) {
-						List<FeatureValue> featureValueList = featurizer.featurize(passage, w, question, a_counter);
+					for(FeaturizerOne featurizerOne:this.featurizerOnes){
+						List<FeatureValue> featureValueList = featurizerOne.featurize(passage,question,a);
 						feature_pqaw.addAll(featureValueList);
 					}
-					for (FeaturizerOne featurizerOne : this.featurizerOnes) {
-						List<FeatureValue> featureValueList = featurizerOne.featurize(passage, question, a);
+					
+					for(Featurizer featurizer:this.featurizers){
+						List<FeatureValue> featureValueList = featurizer.featurize(passage,w,question,a_counter);
 						feature_pqaw.addAll(featureValueList);
 					}
 					feature_pqa.add(feature_pqaw);
@@ -249,15 +284,16 @@ public class ClassifierBased implements MCSystem{
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					for (Featurizer featurizer : this.featurizers) {
-						List<FeatureValue> featureValueList = featurizer.featurize(passage, w, question, a_counter);
-						feature_pqaw.addAll(featureValueList);
-					}
 					for (FeaturizerOne featurizerOne : this.featurizerOnes) {
 						List<FeatureValue> featureValueList = featurizerOne.featurize(passage, question, a);
 						feature_pqaw.addAll(featureValueList);
 					}
-
+					
+					for (Featurizer featurizer : this.featurizers) {
+						List<FeatureValue> featureValueList = featurizer.featurize(passage, w, question, a_counter);
+						feature_pqaw.addAll(featureValueList);
+					}
+					
 					feature_pqa.add(feature_pqaw);
 				}
 				test_features.add(feature_pqa);

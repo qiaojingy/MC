@@ -10,6 +10,7 @@ import java.util.*;
 import java.lang.Math;
 
 public class BaselineTwo implements MCSystem {
+
 	@Override
 	public void train(List<Task> tasks, List<List<String>> answers) {
 	}
