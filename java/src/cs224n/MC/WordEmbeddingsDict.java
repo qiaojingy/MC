@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +29,21 @@ public class WordEmbeddingsDict {
 	private int topNSize = 40;
 
 
-	public WordEmbeddingsDict(String dataPath) {
+	public WordEmbeddingsDict() {
+		//this("/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin");
+		String dataPath = "/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin";
+		if(! new File(dataPath).exists()){
+			dataPath = "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/GoogleNews-vectors-negative300.bin";
+			if (!new File(dataPath).exists()){
+				System.out.println("ERROR: dictionary not found");
+				System.exit(1);
+			}
+		}
 		loadModel(dataPath);
 	}
-
-	public WordEmbeddingsDict() {
-		this("/Users/david/Documents/Softwares/word2vec/GoogleNews-vectors-negative300.bin");
+	
+	public WordEmbeddingsDict(String dataPath) {
+		loadModel(dataPath);
 	}
 
 
