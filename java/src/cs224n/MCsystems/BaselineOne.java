@@ -9,9 +9,6 @@ import java.util.*;
 import java.lang.Math;
 
 public class BaselineOne implements MCSystem {
-	public void train(List<Task> tasks, List<List<String>> answers) {
-	}
-
 	@Override
 	public void train(List<Task> tasks, List<List<String>> answers) {
 	}

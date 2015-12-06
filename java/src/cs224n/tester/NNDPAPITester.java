@@ -26,7 +26,7 @@ public class NNDPAPITester {
 
 		// Initialize an Annotation with some text to be annotated. The text is the argument to the constructor.
 		Annotation annotation;
-		annotation = new Annotation("Tassadar channeled both Void energy and the Khala of the Aiur protoss into a suicide strike on the Overmind with his flagship, destroying it at the cost of his own life.");
+		annotation = new Annotation("How did Mark feel.");
 
 		// run all the selected Annotators on this text
 		pipeline.annotate(annotation);

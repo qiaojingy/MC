@@ -19,6 +19,10 @@ public class SyntacticFeaturizer implements Featurizer {
 		return this.FEATURE_DIM;
 	}
 
+	public String getName() {
+		return FEATURE_NAME;
+	}
+
 	@Override
 	public void initialize() {}
 

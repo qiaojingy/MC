@@ -12,11 +12,15 @@ import java.lang.Math;
 
 public class DFeaturizer implements Featurizer {
 
-	private static final String FEATURE_NAME = "DistanceBased";
+	private static final String FEATURE_NAME = "DFeature";
 	private static final int FEATURE_DIM = 1;
 
 	public int getDim() {
 		return FEATURE_DIM;
+	}
+
+	public String getName() {
+		return FEATURE_NAME;
 	}
 
 	@Override

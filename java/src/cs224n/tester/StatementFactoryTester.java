@@ -65,11 +65,10 @@ public class StatementFactoryTester<SYS extends MCSystem> {
 		// Read tasks
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
 		List<Task> tasks = TaskReader.read(fileName);
-		Task task = tasks.get(2);
+		Task task = tasks.get(0);
 		List<Question> questions = task.getQuestions();
-		for (Question question : questions) {
-			question.printStatements();
-		}
+		Question question = questions.get(2);
+		question.printStatements();
 	}
 
 

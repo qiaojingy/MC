@@ -10,11 +10,15 @@ import java.util.*;
 
 public class BFeaturizer implements Featurizer {
 
-	private static final String FEATURE_NAME = "B";
+	private static final String FEATURE_NAME = "BFeature";
 	private static final int FEATURE_DIM = 1;
 
 	public int getDim() {
 		return FEATURE_DIM;
+	}
+
+	public String getName() {
+		return FEATURE_NAME;
 	}
 
 	@Override

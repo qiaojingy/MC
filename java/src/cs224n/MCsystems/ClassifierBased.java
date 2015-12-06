@@ -37,8 +37,15 @@ public class ClassifierBased implements MCSystem{
 		this.featurizers.add(bWFeaturizer);
 
 		this.featureDim = 0;
-		for (Featurizer featurizer : this.featurizers) this.featureDim += featurizer.getDim();
-		for (FeaturizerOne featurizerOne : this.featurizerOnes) this.featureDim += featurizerOne.getDim();
+		System.out.println("Using features: ");
+		for (Featurizer featurizer : this.featurizers) {
+			this.featureDim += featurizer.getDim();
+			System.out.println(featurizer.getName());
+		}
+		for (FeaturizerOne featurizerOne : this.featurizerOnes) {
+			this.featureDim += featurizerOne.getDim();
+			System.out.println(featurizerOne.getName());
+		}
 		System.out.println(this.featureDim);
 
 	}
@@ -94,7 +101,7 @@ public class ClassifierBased implements MCSystem{
 		// learning rate
 		double alpha = 0.001;
 		// weight of l2 term
-		double lambda = 0.05;
+		double lambda = 0.1;
 		//findWList();
 		gradientDescent(lambda,alpha);
 		//lambda: 0.1 -- 1 -- 10 -- 100
@@ -105,8 +112,9 @@ public class ClassifierBased implements MCSystem{
 		//repeat until convergence
 		int count = 0;
 		double delta = 0.01;
-		while(count++ < 1000){
+		while(count++ < 2000){
 			if (count%20 == 0) {
+				System.out.format("%dth iteration", count);
 				System.out.print("weights is ");
 				System.out.println(Arrays.toString(this.weights));
 				System.out.println("Loss is " + func(lambda,this.weights));
@@ -199,23 +207,17 @@ public class ClassifierBased implements MCSystem{
 			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
 				List<String> a = A.get(a_counter);
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
-				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
-				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
-				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
-				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					//Featurizer bFeaturizer = new BFeaturizer();
-					//FeatureValue scoreBaselineOne = bFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreBaselineOne);
-					//Featurizer dFeaturizer = new DFeaturizer();
-					//FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
-
+					for (Featurizer featurizer : this.featurizers) {
+						List<FeatureValue> featureValueList = featurizer.featurize(passage, w, question, a_counter);
+						feature_pqaw.addAll(featureValueList);
+					}
+					for (FeaturizerOne featurizerOne : this.featurizerOnes) {
+						List<FeatureValue> featureValueList = featurizerOne.featurize(passage, question, a);
+						feature_pqaw.addAll(featureValueList);
+					}
 					feature_pqa.add(feature_pqaw);
 				}
 				this.features.add(feature_pqa);
@@ -244,22 +246,18 @@ public class ClassifierBased implements MCSystem{
 			for (int a_counter = 0; a_counter < A.size(); a_counter++) {
 				List<String> a = A.get(a_counter);
 				ArrayList<ArrayList<FeatureValue>> feature_pqa = new ArrayList<ArrayList<FeatureValue>>();
-				FeaturizerOne slidingWindowFeaturizer = new SlidingWindowFeaturizer();
-				FeatureValue scoreBaselineOne = slidingWindowFeaturizer.featurize(passage, question, a).get(0); 
-				FeaturizerOne distanceBasedFeaturizer = new DistanceBasedFeaturizer();
-				FeatureValue distancePunish = distanceBasedFeaturizer.featurize(passage, question, a).get(0);
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					//Featurizer bFeaturizer = new BFeaturizer();
-					//FeatureValue scoreBaselineOne = bFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreBaselineOne);
-					//Featurizer dFeaturizer = new DFeaturizer();
-					//FeatureValue distancePunish = dFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(distancePunish);
-					Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-					FeatureValue scoreSyntactic = syntacticFeaturizer.featurize(passage,w,question,a_counter).get(0);
-					feature_pqaw.add(scoreSyntactic);
+					for (Featurizer featurizer : this.featurizers) {
+						List<FeatureValue> featureValueList = featurizer.featurize(passage, w, question, a_counter);
+						feature_pqaw.addAll(featureValueList);
+					}
+					for (FeaturizerOne featurizerOne : this.featurizerOnes) {
+						List<FeatureValue> featureValueList = featurizerOne.featurize(passage, question, a);
+						feature_pqaw.addAll(featureValueList);
+					}
+
 					feature_pqa.add(feature_pqaw);
 				}
 				test_features.add(feature_pqa);

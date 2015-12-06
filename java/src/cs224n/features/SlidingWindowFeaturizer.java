@@ -15,6 +15,10 @@ public class SlidingWindowFeaturizer implements FeaturizerOne {
 		return this.FEATURE_DIM;
 	}
 
+	public String getName() {
+		return FEATURE_NAME;
+	}
+
 	@Override
 	public void initialize() {}
 

@@ -17,6 +17,10 @@ public class BWFeaturizer implements Featurizer {
 	public int getDim() {
 		return this.FEATURE_DIM;
 	}
+
+	public String getName() {
+		return FEATURE_NAME;
+	}
 	
 	public BWFeaturizer() {
 		this(new WordEmbeddingsDict());
