@@ -3,8 +3,6 @@ package cs224n.tester;
 import cs224n.MCsystems.*;
 import cs224n.MC.*;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.io.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.pipeline.*;
@@ -16,14 +14,14 @@ import edu.stanford.nlp.util.*;
 import java.io.*;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
 import java.util.PriorityQueue;
+import java.util.*;
 
 
 
 /**
  * The framework for running machine comprehension system
- * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at st * anford.edu)
+ * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at stanford.edu)
  */
 
 public class ClassifierTester<SYS extends MCSystem> {

@@ -18,7 +18,6 @@ import java.io.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.PriorityQueue;
 import java.util.StringJoiner;
 
 
@@ -286,6 +285,21 @@ public class StatementFactory {
 								}
 							}
 							break;
+						case "WP":
+							for (CoreMap option : options) {
+								answer = option.get(CoreAnnotations.TextAnnotation.class);
+								StringJoiner joiner = new StringJoiner(" ");
+								for (CoreLabel token : tokens) {
+									if (token == whToken) joiner.add(answer);
+									else if (!(token.value().equals("?"))) {
+										joiner.add(token.value());
+									}
+								}
+								statementStrings.add(joiner.toString());
+							}
+							break;
+
+
 						default:
 							parsable = false;
 							break;

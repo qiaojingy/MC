@@ -12,9 +12,9 @@ import java.util.*;
 /**
  * A question is a multiple choice question for the passage, 
  * A question consists of the stem, the option, and the answer. 
- * @author Gabor Angeli (angeli at cs.stanford)
+ * @author Qiaojing Yan (qiaojing at cs.stanford), Yixin Wang (wyixin at stanford.edu)
  */
-public class Question implements Serializable, Decodable {
+public class Question implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 
@@ -269,46 +269,4 @@ public class Question implements Serializable, Decodable {
 	@Override
 	public String toString(){ return this.normalPrint(); }
 
-	//--------------
-	// SERIALIZATION
-	//--------------
-	public String encode() {
-		/*
-			 StringBuilder b = new StringBuilder();
-		//(save question type)
-		b.append(this.questionType.name()).append("\n");
-		//(save stem)
-		b.append("stem:\n");
-		for(CoreMap s : stem){
-		b.append(s.encode()).append("\n");
-		}
-		//(end)
-		b.append("<end>");
-		//(error check)
-		if(!decode(b.toString()).equals(this)){
-		throw new IllegalStateException("Did not encode Document properly");
-		}
-		return b.toString();
-		*/
-		return null;
-	}
-
-	public static Question decode(String encoded){
-		/*
-			 String[] lines = encoded.split("\n");
-		//(get question type)
-		QuestionType questionType = QuestionType.valueOf(lines[0]);
-		//(get stem)
-		if(!lines[1].equals("stem:")){ throw new IllegalStateException("Could not decode Question: " + " offending line: " + lines[1]); }
-		int index = 2;
-		List<CoreMap> stem = new ArrayList<Sentence>();
-		while(!lines[index].equals("<end>")){
-		stem.add(CoreMap.decode(lines[index]));
-		index += 1;
-		}
-		List<String> options = null;
-		return new Question(questionType, stem, options);
-		*/
-		return null;
-	}
 }

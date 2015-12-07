@@ -8,7 +8,7 @@ import java.util.List;
 
 
 /**
- * The framework class for building a coreference system.
+ * The framework class for building a machine comprehension system.
  *
  *
  */

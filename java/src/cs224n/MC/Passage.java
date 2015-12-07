@@ -14,9 +14,9 @@ import java.util.*;
 /**
  * A passage is the story part of the document
  *
- * @author Gabor Angeli (angeli at cs.stanford)
+ * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at stanford.edu)
  */
-public class Passage implements Serializable, Decodable {
+public class Passage implements Serializable {
 	private static final long serialVersionUID = 1L;
 	/**
 	 * The sentences in this passage
@@ -239,41 +239,4 @@ public class Passage implements Serializable, Decodable {
 		return cand.intValue();
 	}
 
-	//--------------
-	// SERIALIZATION
-	//--------------
-	public String encode() {
-		/*
-			 StringBuilder b = new StringBuilder();
-		//(save sentences)
-		b.append("sentences:\n");
-		for(CoreMap s : sentences){
-		b.append(s.encode()).append("\n");
-		}
-		//(end)
-		b.append("<end>");
-		//(error check)
-		if(!decode(b.toString()).equals(this)){
-		throw new IllegalStateException("Did not encode Document properly");
-		}
-		return b.toString();
-		*/
-		return null;
-	}
-
-	public static Passage decode(String encoded){
-		/*
-			 String[] lines = encoded.split("\n");
-		//(get sentences)
-		if(!lines[0].equals("sentences:")){ throw new IllegalStateException("Could not decode document: " + " offending line: " + lines[0]); }
-		int index = 1;
-		List<CoreMap> sentences = new ArrayList<CoreMap>();
-		while(!lines[index].equals("<end>")){
-		sentences.add(CoreMap.decode(lines[index]));
-		index += 1;
-		}
-		return new Passage(sentences);
-		*/
-		return null;
-	}
 }
