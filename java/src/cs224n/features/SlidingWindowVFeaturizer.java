@@ -9,11 +9,15 @@ import java.util.*;
 
 public class SlidingWindowVFeaturizer implements FeaturizerOne {
 
-	private static final String FEATURE_NAME = "SlidingWindow";
+	private static final String FEATURE_NAME = "SlidingWindowV";
 	private static final int FEATURE_DIM = 1;
 
 	public int getDim() {
 		return this.FEATURE_DIM;
+	}
+
+	public String getName() {
+		return FEATURE_NAME;
 	}
 
 	@Override
@@ -73,6 +77,7 @@ public class SlidingWindowVFeaturizer implements FeaturizerOne {
 			}
 		}
 
+		if (q.isNegation()) maxScore = -maxScore;
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		features.add(new FeatureValue(FEATURE_NAME, maxScore));
 		return features;

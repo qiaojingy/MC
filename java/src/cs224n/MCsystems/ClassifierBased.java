@@ -6,6 +6,7 @@ import cs224n.features.*;
 
 import edu.stanford.nlp.util.*;
 import edu.stanford.nlp.stats.*;
+import edu.stanford.nlp.ling.*;
 
 import java.util.*;
 import java.lang.Math;
@@ -22,32 +23,54 @@ public class ClassifierBased implements MCSystem{
 	public static ArrayList<Integer> numQuestion = new ArrayList<Integer>();
 	private List<Featurizer> featurizers;
 	private List<FeaturizerOne> featurizerOnes;
+	private List<Integer> wResult;
 	
 	public ClassifierBased() {
 		this.featurizers = new ArrayList<Featurizer>();
 		this.featurizerOnes = new ArrayList<FeaturizerOne>();
 
-		FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
-		this.featurizerOnes.add(bFeaturizer);
-		FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
-		this.featurizerOnes.add(dFeaturizer);
+		//FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
+		//this.featurizerOnes.add(bFeaturizer);
+		FeaturizerOne bLFeaturizer = new SlidingWindowLFeaturizer();
+		this.featurizerOnes.add(bLFeaturizer);
+		//FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
+		//this.featurizerOnes.add(dFeaturizer);
+		FeaturizerOne dLFeaturizer = new DistanceBasedLFeaturizer();
+		this.featurizerOnes.add(dLFeaturizer);
+		//Featurizer bFeaturizer_w = new BFeaturizer();
+		//this.featurizers.add(bFeaturizer_w);
+		//Featurizer dFeaturizer_w = new DFeaturizer();
+		//this.featurizers.add(dFeaturizer_w);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
-		Featurizer bWFeaturizer = new BWFeaturizer();
-		this.featurizers.add(bWFeaturizer);
+		//Featurizer bWFeaturizer = new BWFeaturizer();
+		//this.featurizers.add(bWFeaturizer);
 
 		this.featureDim = 0;
-		for (Featurizer featurizer : this.featurizers) this.featureDim += featurizer.getDim();
-		for (FeaturizerOne featurizerOne : this.featurizerOnes) this.featureDim += featurizerOne.getDim();
+		System.out.println("Using features: ");
+		for (Featurizer featurizer : this.featurizers) {
+			this.featureDim += featurizer.getDim();
+			System.out.println(featurizer.getName());
+		}
+		for (FeaturizerOne featurizerOne : this.featurizerOnes) {
+			this.featureDim += featurizerOne.getDim();
+			System.out.println(featurizerOne.getName());
+		}
+		System.out.print("Total feature dimension:  ");
 		System.out.println(this.featureDim);
 
 	}
 	
+	public List<Integer> getWResult() {
+		return this.wResult;
+	}
+
 	// function for prediction: returns the index of the instance (0 based) that maximizes the score
 	// features: row: instances (options for a question), column: feature values
-	public int predictOne(ArrayList<ArrayList<ArrayList<FeatureValue>>> feature_pq){
+	public int predictOne(ArrayList<ArrayList<ArrayList<FeatureValue>>> feature_pq, boolean saveW){
 		double maxValue_outer = 0 - Double.MAX_VALUE;
 		int maxIdx = -1;
+		int wTemp = -1;
 		for(int a = 0; a < feature_pq.size(); a++){
 			ArrayList<ArrayList<FeatureValue>> feature_pqa = feature_pq.get(a);
 			double maxValue_inner = 0 - Double.MAX_VALUE;
@@ -64,9 +87,15 @@ public class ClassifierBased implements MCSystem{
 			if(score > maxValue_outer){
 				maxValue_outer = score;
 				maxIdx = a;
+				wTemp = maxIdx_inner; 
 			}
 		}
+		if (saveW) this.wResult.add(wTemp);
 		return maxIdx;
+	}
+
+	public int predictOne(ArrayList<ArrayList<ArrayList<FeatureValue>>> feature_pq) {
+		return this.predictOne(feature_pq, false);
 	}
 	
 	public void initialize(){
@@ -146,6 +175,7 @@ public class ClassifierBased implements MCSystem{
 		while(/*count < 1000*/true){
 			count++;
 			if (count%20 == 0) {
+				System.out.format("%dth iteration", count);
 				System.out.print("weights is ");
 				System.out.println(Arrays.toString(this.weights));
 				System.out.println("Loss is " + func(lambda,this.weights,wList));
@@ -236,7 +266,6 @@ public class ClassifierBased implements MCSystem{
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					
 					for(FeaturizerOne featurizerOne:this.featurizerOnes){
 						List<FeatureValue> featureValueList = featurizerOne.featurize(passage,question,a);
 						feature_pqaw.addAll(featureValueList);
@@ -261,6 +290,8 @@ public class ClassifierBased implements MCSystem{
 		List<Question> questions = task.getQuestions();
 		// Answers stores the answer for each question
 		List<String> answers = new ArrayList<String>();
+
+		this.wResult = new ArrayList<Integer>();
 		
 		// Iterate through each question and predict answers
 		for (Question question : questions) {
@@ -277,7 +308,6 @@ public class ClassifierBased implements MCSystem{
 				
 				for(int w = 0; w < passage.totalSentenceNum(); w++){
 					ArrayList<FeatureValue> feature_pqaw = new ArrayList<FeatureValue>();
-					
 					for (FeaturizerOne featurizerOne : this.featurizerOnes) {
 						List<FeatureValue> featureValueList = featurizerOne.featurize(passage, question, a);
 						feature_pqaw.addAll(featureValueList);
@@ -292,7 +322,7 @@ public class ClassifierBased implements MCSystem{
 				}
 				test_features.add(feature_pqa);
 			}
-			int i_ans = predictOne(test_features);
+			int i_ans = predictOne(test_features, true);
 			String ans = "";
 			switch(i_ans){
 				case 0:

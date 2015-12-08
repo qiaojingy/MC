@@ -19,6 +19,10 @@ public class SyntacticFeaturizer implements Featurizer {
 		return this.FEATURE_DIM;
 	}
 
+	public String getName() {
+		return FEATURE_NAME;
+	}
+
 	@Override
 	public void initialize() {}
 
@@ -50,7 +54,8 @@ public class SyntacticFeaturizer implements Featurizer {
 		List<String> commonDependencyList = new ArrayList<String>(statementDependencyList);
 		commonDependencyList.retainAll(sentenceDependencyList);
 		//System.out.println(commonDependencyList);
-		features.add(new FeatureValue(FEATURE_NAME+"_One", commonDependencyList.size()));
+		if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME+"_One", -commonDependencyList.size()));
+		else features.add(new FeatureValue(FEATURE_NAME+"_One", commonDependencyList.size()));
 
 
 		return features;

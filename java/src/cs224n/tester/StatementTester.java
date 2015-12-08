@@ -25,10 +25,10 @@ import java.util.StringJoiner;
 
 /**
  * The framework for running machine comprehension system
- * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at st * anford.edu)
+ * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at stanford.edu)
  */
 
-public class StatementTester<SYS extends MCSystem> {
+public class StatementTester {
 
 	public static void main(String[] args) {
   	// Create a CoreNLP pipeline. This line just builds the default pipeline.
@@ -63,7 +63,7 @@ public class StatementTester<SYS extends MCSystem> {
 			//
 			//
 			//
-			annotation = new Annotation("What did James pull off?");
+			annotation = new Annotation("What does James do when his glove rips");
 
 			// run all the selected Annotators on this text
 			pipeline.annotate(annotation);
@@ -128,7 +128,7 @@ public class StatementTester<SYS extends MCSystem> {
 			//
 			//
 			//
-			String answer = "pudding";
+			String answer = "Alex";
 
 			// Find the wh- word
 			List<CoreLabel> tokens = sentence.get(CoreAnnotations.TokensAnnotation.class);

@@ -14,7 +14,6 @@ import java.io.*;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
-import java.util.PriorityQueue;
 
 public class TaskReader {
 	public static List<Task> readFromText(String fileName) {

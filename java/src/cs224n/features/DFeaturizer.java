@@ -12,11 +12,15 @@ import java.lang.Math;
 
 public class DFeaturizer implements Featurizer {
 
-	private static final String FEATURE_NAME = "DistanceBased";
+	private static final String FEATURE_NAME = "DFeature";
 	private static final int FEATURE_DIM = 1;
 
 	public int getDim() {
 		return FEATURE_DIM;
+	}
+
+	public String getName() {
+		return FEATURE_NAME;
 	}
 
 	@Override
@@ -48,7 +52,8 @@ public class DFeaturizer implements Featurizer {
 
 		List<FeatureValue> features = new ArrayList<FeatureValue>();
 		if (SQ_set.size() == 0 || SAi_set.size() == 0) {
-			features.add(new FeatureValue(FEATURE_NAME, 1));
+			if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME, 1));
+			else features.add(new FeatureValue(FEATURE_NAME, 1));
 			return features;
 		}
 		else {
@@ -63,7 +68,8 @@ public class DFeaturizer implements Featurizer {
 					}
 				}
 			}
-			features.add(new FeatureValue(FEATURE_NAME, min/(sentenceTokenStrings.size()-1)));
+			if (q.isNegation()) features.add(new FeatureValue(FEATURE_NAME, -min/(sentenceTokenStrings.size()-1)));
+			else features.add(new FeatureValue(FEATURE_NAME, min/(sentenceTokenStrings.size()-1)));
 			return features;
 		}
 	}

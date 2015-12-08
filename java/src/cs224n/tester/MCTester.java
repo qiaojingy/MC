@@ -3,15 +3,9 @@ package cs224n.tester;
 import cs224n.MCsystems.*;
 import cs224n.MC.*;
 
-import edu.stanford.nlp.dcoref.CorefChain;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
-import edu.stanford.nlp.io.*;
+import edu.stanford.nlp.util.StringUtils;
+import edu.stanford.nlp.util.MetaClass;
 import edu.stanford.nlp.ling.*;
-import edu.stanford.nlp.pipeline.*;
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
-import edu.stanford.nlp.trees.*;
-import edu.stanford.nlp.util.*;
 
 import java.io.*;
 import java.io.IOException;
@@ -22,11 +16,10 @@ import java.util.PriorityQueue;
 
 
 /**
- * The framework for running machine comprehension system
- * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at st * anford.edu)
+ * @author Qiaojing Yan (qiaojing at stanford.edu), Yixin Wang (wyixin at stanford.edu)
  */
 
-public class MCTester<SYS extends MCSystem> {
+public class MCTester {
 	private static String dataPath = "/Users/yixinwang/Study/2015Autumn/CS224N/project/Data/MCTest/";
 
 	public static enum DataType {
@@ -127,6 +120,7 @@ public class MCTester<SYS extends MCSystem> {
 		trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
 		
 		// Train the MC system
+		System.out.println("Training MC System ... ");
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
@@ -146,19 +140,41 @@ public class MCTester<SYS extends MCSystem> {
 		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
+		System.out.println("Testing MC System ... ");
 		Integer correct = 0;
 		Integer all = 0;
+		boolean debug = false;
+		int numMistakes = 0; 
+		if (props.containsKey("mistakes")) {
+			debug = true; 
+			if (props.getProperty("mistakes").equals("true")) numMistakes = 10;
+			else numMistakes = Integer.parseInt(props.getProperty("mistakes"));
+			System.out.format("The first %d mistakes: \n", numMistakes);
+		}
 		for (int i=0; i<testTasks.size(); i++) {
 			Task task= testTasks.get(i);
 			List<String> answers = system.runMC(task);
 			List<String> testGoldAnswerList = testGoldAnswerLists.get(i);
+			if (debug && numMistakes > 0) {
+				System.out.println();
+				System.out.println(task);
+			}
 			for (int j=0; j<answers.size(); j++){
-				//System.out.format("%d th question: ", j+1);
+				if (debug && numMistakes > 0) System.out.format("%d th question: ", j+1);
 				if (answers.get(j).equalsIgnoreCase(testGoldAnswerList.get(j))) {
 					correct += 1;
-					//System.out.print("Correct!");
+					if (debug && numMistakes > 0) {
+						System.out.format("Correct!  Answer: %s \n", testGoldAnswerList.get(j));
+						System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+					}
 				}
-				//System.out.format("Gold: %s,  Answer: %s %n", goldAnswerList.get(j), answers.get(j));
+				else {
+					if (debug && numMistakes > 0) {
+						System.out.format("Gold: %s,  Answer: %s \n", testGoldAnswerList.get(j), answers.get(j));
+						System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+						numMistakes--;
+					}
+				}
 				all += 1;
 			}
 		}
