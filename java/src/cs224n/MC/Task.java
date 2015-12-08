@@ -75,4 +75,8 @@ public class Task implements Serializable {
     return b.toString();
   }
 
+	public String toString() {
+		return this.normalPrint();
+	}
+
 }
