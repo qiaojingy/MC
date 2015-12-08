@@ -35,14 +35,14 @@ public class ClassifierBased implements MCSystem{
 		this.featurizerOnes.add(bLFeaturizer);
 		//FeaturizerOne dFeaturizer = new DistanceBasedFeaturizer();
 		//this.featurizerOnes.add(dFeaturizer);
-		FeaturizerOne dLFeaturizer = new DistanceBasedLFeaturizer();
-		this.featurizerOnes.add(dLFeaturizer);
+		//FeaturizerOne dLFeaturizer = new DistanceBasedLFeaturizer();
+		//this.featurizerOnes.add(dLFeaturizer);
 		//Featurizer bFeaturizer_w = new BFeaturizer();
 		//this.featurizers.add(bFeaturizer_w);
 		//Featurizer dFeaturizer_w = new DFeaturizer();
 		//this.featurizers.add(dFeaturizer_w);
-		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
-		this.featurizers.add(syntacticFeaturizer);
+		//Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
+		//this.featurizers.add(syntacticFeaturizer);
 		//Featurizer bWFeaturizer = new BWFeaturizer();
 		//this.featurizers.add(bWFeaturizer);
 

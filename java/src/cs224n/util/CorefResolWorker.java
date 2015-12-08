@@ -14,7 +14,7 @@ import edu.stanford.nlp.dcoref.CorefChain.*;
 import edu.stanford.nlp.ling.CoreAnnotations;
 
 public class CorefResolWorker{
-	public static final List<String> doCorefResolution(Annotation annotation){
+	public static final String doCorefResolution(Annotation annotation){
 		
 		Map<Integer,CorefChain> corefs = annotation.get(CorefChainAnnotation.class);
 		List<CoreMap> sentences = annotation.get(CoreAnnotations.SentencesAnnotation.class);
@@ -47,6 +47,6 @@ public class CorefResolWorker{
 	    }
 	    System.out.println(resolvedStr);
 		
-		return resolved;
+		return resolvedStr;
 	}
 }

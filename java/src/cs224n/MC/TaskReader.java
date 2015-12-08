@@ -9,6 +9,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.util.*;
+import cs224n.util.CorefResolWorker;
 
 import java.io.*;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.io.Serializable;
 import java.util.*;
 
 public class TaskReader {
-	public static List<Task> readFromText(String fileName) {
+	public static List<Task> readFromText(String fileName,boolean coref) {
 		List<Task> tasks = new ArrayList<Task>();
 		try {
 			// FileReader reads text files in the default encoding
@@ -26,11 +27,19 @@ public class TaskReader {
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 			// Prepare to use Stanford CoreNLP to process the string
-			Properties props = new Properties();
-			props.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse, dcoref");
-			props.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
-			props.put("ner.applyNumericClassifiers", "false");
-			StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+			// properties for coref resolution
+			Properties props1 = new Properties();
+			props1.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, dcoref");
+			props1.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+			props1.put("ner.applyNumericClassifiers", "false");
+			StanfordCoreNLP pipeline1 = new StanfordCoreNLP(props1);
+			
+			// Properties for annotating the passage after coref resolution
+			Properties props2 = new Properties();
+			props2.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse");
+			props2.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
+			props2.put("ner.applyNumericClassifiers", "false");
+			StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props2);
 
 			String line;
 			while ((line = bufferedReader.readLine())!= null) {
@@ -50,7 +59,16 @@ public class TaskReader {
 
 				Annotation annotation_passage = new Annotation(passageString);
 				// run all the selected Annotators on this text
-				pipeline.annotate(annotation_passage);
+				if(coref == true){
+					System.out.println(passageString);
+					pipeline1.annotate(annotation_passage);
+					passageString = CorefResolWorker.doCorefResolution(annotation_passage);
+					annotation_passage = new Annotation(passageString);
+				}
+				
+				pipeline2.annotate(annotation_passage);
+				
+				System.out.println(passageString);
 
 				List<CoreMap> sentences = annotation_passage.get(CoreAnnotations.SentencesAnnotation.class);
 				if (sentences != null && ! sentences.isEmpty()) {
@@ -81,14 +99,14 @@ public class TaskReader {
 					// Read question stem
 					String questionString = terms[lineIndex].split(": ")[1];
 					Annotation annotation_stem = new Annotation(questionString);
-					pipeline.annotate(annotation_stem);
+					pipeline2.annotate(annotation_stem);
 					List<CoreMap> stem = annotation_stem.get(CoreAnnotations.SentencesAnnotation.class);
 					// Read options
 					List<CoreMap> options = new ArrayList<CoreMap>();
 					List<Annotation> annotation_options = new ArrayList<Annotation>();
 					for (int i=1; i<=4; i++){
 						Annotation annotation_oneOption = new Annotation(terms[lineIndex+i]);
-						pipeline.annotate(annotation_oneOption);
+						pipeline2.annotate(annotation_oneOption);
 						annotation_options.add(annotation_oneOption);
 						options.add(annotation_oneOption.get(CoreAnnotations.SentencesAnnotation.class).get(0));
 					}
@@ -111,12 +129,14 @@ public class TaskReader {
 
 		// Save the tasks by serialization
 		try {
-			FileOutputStream fileOut = new FileOutputStream(fileName + ".ser");
+			String s_coref = "";
+			if(coref == true)s_coref = ".coref";
+			FileOutputStream fileOut = new FileOutputStream(fileName + s_coref + ".ser");
 			ObjectOutputStream objOut = new ObjectOutputStream(fileOut);
 			objOut.writeObject(tasks);
 			objOut.close();
 			fileOut.close();
-			System.out.println("Serialized data is saved in " + fileName + ".ser");
+			System.out.println("Serialized data is saved in " + fileName + s_coref + ".ser");
 		}
 		catch (IOException e) {
 			System.out.println("Exception during serialization: " + e);
@@ -142,15 +162,17 @@ public class TaskReader {
 
 
 
-	public static List<Task> read(String fileName) {
-		String serializedDataName = fileName + ".ser";
+	public static List<Task> read(String fileName,boolean coref) {
+		String s_coref = "";
+		if(coref == true)s_coref = ".coref";
+		String serializedDataName = fileName + s_coref + ".ser";
 		File f = new File(serializedDataName);
 		if (f.exists() && !f.isDirectory()) {
 			System.out.println("Reading from serialized data ......");
 			return readFromSerializedData(serializedDataName);
 		}
 		else {
-			return readFromText(fileName);
+			return readFromText(fileName,coref);
 		}
 	}
 

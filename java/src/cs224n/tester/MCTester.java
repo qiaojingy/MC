@@ -26,16 +26,16 @@ public class MCTester {
 		TRAIN, DEV, TEST
 	}
 
-	private static List<Task> getData(String dataPath) {
-		String fileName = dataPath.concat(new String("mc500.test.tsv"));
-		System.out.print("Reading:  ");
-		System.out.println(fileName);
-		String line = null;
-
-		List<Task> tasks = TaskReader.read(fileName);
-
-		return tasks;
-	}
+	//private static List<Task> getData(String dataPath,boolean b_coref) {
+	//	String fileName = dataPath.concat(new String("mc500.test.tsv"));
+	//	System.out.print("Reading:  ");
+	//	System.out.println(fileName);
+	//	String line = null;
+    //
+	//	List<Task> tasks = TaskReader.read(fileName,b_coref);
+    //
+	//	return tasks;
+	//}
 
 
 	public static void main(String[] args) {
@@ -68,6 +68,16 @@ public class MCTester {
 		System.out.println("Creating MC System...");
 		//(classname)
 		String systemClass = props.getProperty("model", "BaselineOne");
+		String argCoref = props.getProperty("coref","false");
+		boolean b_coref;
+		if(argCoref.equals("true")){
+			b_coref = true;
+			System.out.println("Coreference Resolution required. ");
+		}
+		else{
+			b_coref = false;
+			System.out.println("No coreference resolution required. ");
+		}
 		//if (systemClass.equalsIgnoreCase("baselineone")) {
 		//	systemClass = BaselineOne.class.getName();
 		//}
@@ -106,10 +116,10 @@ public class MCTester {
 		// Read training tasks
 		System.out.println("Reading training tasks ...");
 		String fileName = dataPath.concat(new String("mc160.train.tsv"));
-		List<Task> trainingTasks = TaskReader.read(fileName);
+		List<Task> trainingTasks = TaskReader.read(fileName,b_coref);
 
 		fileName = dataPath.concat(new String("mc500.train.tsv"));
-		trainingTasks.addAll(TaskReader.read(fileName));
+		trainingTasks.addAll(TaskReader.read(fileName,b_coref));
 		
 		// Read training answers
 		System.out.println("Reading gold answers ...");
@@ -126,10 +136,10 @@ public class MCTester {
 		// Read test tasks
 		String dev_or_test = "test";
 		fileName = dataPath.concat(new String("mc160."+dev_or_test+".tsv"));
-		List<Task> testTasks = TaskReader.read(fileName);
+		List<Task> testTasks = TaskReader.read(fileName,b_coref);
 
 		fileName = dataPath.concat(new String("mc500."+dev_or_test+".tsv"));
-		testTasks.addAll(TaskReader.read(fileName));
+		testTasks.addAll(TaskReader.read(fileName,b_coref));
 
 		// Read answers
 		System.out.println("Reading gold answers ...");
