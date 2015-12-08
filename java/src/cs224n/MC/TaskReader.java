@@ -36,7 +36,7 @@ public class TaskReader {
 			
 			// Properties for annotating the passage after coref resolution
 			Properties props2 = new Properties();
-			props2.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, depparse");
+			props2.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, dcoref, depparse");
 			props2.put("ner.model", "edu/stanford/nlp/models/ner/english.all.3class.distsim.crf.ser.gz");
 			props2.put("ner.applyNumericClassifiers", "false");
 			StanfordCoreNLP pipeline2 = new StanfordCoreNLP(props2);
@@ -62,11 +62,12 @@ public class TaskReader {
 				if(coref == true){
 					System.out.println(passageString);
 					pipeline1.annotate(annotation_passage);
-					passageString = CorefResolWorker.doCorefResolution(annotation_passage);
+					//passageString = CorefResolWorker.doCorefResolution(annotation_passage);
 					annotation_passage = new Annotation(passageString);
 				}
 				
-				pipeline2.annotate(annotation_passage);
+				//pipeline2.annotate(annotation_passage);
+				pipeline1.annotate(annotation_passage);
 				
 				System.out.println(passageString);
 
