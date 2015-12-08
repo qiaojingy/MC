@@ -130,7 +130,7 @@ public class MCTester<SYS extends MCSystem> {
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		String dev_or_test = "dev";
+		String dev_or_test = "test";
 		fileName = dataPath.concat(new String("mc160."+dev_or_test+".tsv"));
 		List<Task> testTasks = TaskReader.read(fileName);
 
