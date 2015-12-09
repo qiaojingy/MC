@@ -113,47 +113,50 @@ public class MCTester {
 			System.exit(1);
 		}
 
-		String fileName;
 		// Read training tasks
-		/////System.out.println("Reading training tasks ...");
-		/////String fileName = dataPath.concat(new String("mc160.train.tsv"));
-		/////List<Task> trainingTasks = TaskReader.read(fileName,b_coref);
-        /////
-		/////fileName = dataPath.concat(new String("mc500.train.tsv"));
-		/////trainingTasks.addAll(TaskReader.read(fileName,b_coref));
-		/////
-		/////// Read training answers
-		/////System.out.println("Reading gold answers ...");
-		/////fileName = dataPath.concat(new String("mc160.train.ans"));
-		/////List<List<String>> trainingGoldAnswerLists = AnswerReader.read(fileName);
-		/////
-		/////fileName = dataPath.concat(new String("mc500.train.ans"));
-		/////trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
-		/////
-		/////// Train the MC system
-		/////System.out.println("Training MC System ... ");
-		/////system.train(trainingTasks,trainingGoldAnswerLists);
+		System.out.println("Reading training tasks ...");
+		String fileName = dataPath.concat(new String("mc160.train.tsv"));
+		List<Task> trainingTasks = TaskReader.read(fileName,b_coref);
+        
+		fileName = dataPath.concat(new String("mc500.train.tsv"));
+		trainingTasks.addAll(TaskReader.read(fileName,b_coref));
+		
+		// Read training answers
+		System.out.println("Reading gold answers ...");
+		fileName = dataPath.concat(new String("mc160.train.ans"));
+		List<List<String>> trainingGoldAnswerLists = AnswerReader.read(fileName);
+		
+		fileName = dataPath.concat(new String("mc500.train.ans"));
+		trainingGoldAnswerLists.addAll(AnswerReader.read(fileName));
+		
+		// Train the MC system
+		System.out.println("Training MC System ... ");
+		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		String dev_or_test = "train";
+		String dev_or_test = "test";
 		fileName = dataPath.concat(new String("mc160."+dev_or_test+".tsv"));
 		List<Task> testTasks = TaskReader.read(fileName,b_coref);
 
-		/////fileName = dataPath.concat(new String("mc500."+dev_or_test+".tsv"));
-		/////testTasks.addAll(TaskReader.read(fileName,b_coref));
+		fileName = dataPath.concat(new String("mc500."+dev_or_test+".tsv"));
+		testTasks.addAll(TaskReader.read(fileName,b_coref));
 
 		// Read answers
 		System.out.println("Reading gold answers ...");
 		fileName = dataPath.concat(new String("mc160."+dev_or_test+".ans"));
 		List<List<String>> testGoldAnswerLists = AnswerReader.read(fileName);
 
-		/////fileName = dataPath.concat(new String("mc500."+dev_or_test+".ans"));
-		/////testGoldAnswerLists.addAll(AnswerReader.read(fileName));
+		fileName = dataPath.concat(new String("mc500."+dev_or_test+".ans"));
+		testGoldAnswerLists.addAll(AnswerReader.read(fileName));
 
 		// Do machine comprehension using selected MC system and compare with answer
 		System.out.println("Testing MC System ... ");
 		Integer correct = 0;
+		Integer correct_one = 0;
+		Integer correct_multi = 0;
 		Integer all = 0;
+		Integer all_one = 0;
+		Integer all_multi = 0;
 		boolean debug = false;
 		int numMistakes = 0; 
 		if (props.containsKey("mistakes")) {
@@ -162,33 +165,55 @@ public class MCTester {
 			else numMistakes = Integer.parseInt(props.getProperty("mistakes"));
 			System.out.format("The first %d mistakes: \n", numMistakes);
 		}
+		
+		try{
+		PrintWriter writer = new PrintWriter("mistakes.txt", "UTF-8");
+		
 		for (int i=0; i<testTasks.size(); i++) {
 			Task task= testTasks.get(i);
 			List<String> answers = system.runMC(task);
 			List<String> testGoldAnswerList = testGoldAnswerLists.get(i);
 			if (debug && numMistakes > 0) {
-				System.out.println();
-				System.out.println(task);
+				writer.println();
+				writer.println(task);
 			}
 			for (int j=0; j<answers.size(); j++){
-				if (debug && numMistakes > 0) System.out.format("%d th question: ", j+1);
+				Question.QuestionType questionType = task.getQuestions().get(j).questionType;
+				
+				//if (debug && numMistakes > 0) System.out.format("%d th question: ", j+1);
 				if (answers.get(j).equalsIgnoreCase(testGoldAnswerList.get(j))) {
 					correct += 1;
+					if(questionType == Question.QuestionType.ONE)correct_one++;
+					else correct_multi++;
 					if (debug && numMistakes > 0) {
-						System.out.format("Correct!  Answer: %s \n", testGoldAnswerList.get(j));
-						System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+						//System.out.format("Correct!  Answer: %s \n", testGoldAnswerList.get(j));
+						//System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+						writer.printf("Correct!  Answer: %s \n", testGoldAnswerList.get(j));
+						writer.printf("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
 					}
 				}
 				else {
 					if (debug && numMistakes > 0) {
-						System.out.format("Gold: %s,  Answer: %s \n", testGoldAnswerList.get(j), answers.get(j));
-						System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+						//System.out.format("Gold: %s,  Answer: %s \n", testGoldAnswerList.get(j), answers.get(j));
+						//System.out.format("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
+						writer.printf("Gold: %s,  Answer: %s \n", testGoldAnswerList.get(j), answers.get(j));
+						writer.printf("W = %d : %s\n", system.getWResult().get(j), task.getPassage().getSentence(system.getWResult().get(j)).get(CoreAnnotations.TextAnnotation.class));
 						numMistakes--;
 					}
 				}
 				all += 1;
+				if(questionType == Question.QuestionType.ONE)all_one++;
+				else all_multi++;
 			}
 		}
+		
+		writer.close();
+		}
+		
+		catch(IOException ex){
+			System.out.println("Error reading file.");
+		}
+		
 		System.out.print("Correctly answered ");
 		System.out.print(correct.toString());
 		System.out.print(" out of ");
@@ -197,6 +222,16 @@ public class MCTester {
 
 		Double accuracy = correct * 100.0/all; 
 		System.out.print("Accuracy:  ");
+		System.out.print(accuracy.toString());
+		System.out.println("%");
+		
+		accuracy = correct_one * 100.0 / all_one;
+		System.out.print("One Accuracy:  ");
+		System.out.print(accuracy.toString());
+		System.out.println("%");
+		
+		accuracy = correct_multi * 100.0 / all_multi;
+		System.out.print("Multi Accuracy:  ");
 		System.out.print(accuracy.toString());
 		System.out.println("%");
 	}

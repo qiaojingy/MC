@@ -18,7 +18,7 @@ public class Question implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 
-	public static enum QuestionType {
+	public enum QuestionType {
 		ONE, MULTIPLE
 	}
 
