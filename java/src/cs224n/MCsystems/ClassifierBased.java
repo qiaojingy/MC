@@ -43,8 +43,8 @@ public class ClassifierBased implements MCSystem{
 		//this.featurizers.add(dFeaturizer_w);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
-		//Featurizer bWFeaturizer = new BWFeaturizer();
-		//this.featurizers.add(bWFeaturizer);
+		Featurizer bWFeaturizer = new BWFeaturizer();
+		this.featurizers.add(bWFeaturizer);
 
 		this.featureDim = 0;
 		System.out.println("Using features: ");
@@ -125,7 +125,7 @@ public class ClassifierBased implements MCSystem{
 		// learning rate
 		double alpha = 0.0001;
 		// weight of l2 term
-		double lambda = 10;
+		double lambda = 1;
 		// EM, loop until convergence
 		double[] old_weights = new double[featureDim];
 		int count = 0;
