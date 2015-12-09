@@ -100,7 +100,7 @@ public class ClassifierBased implements MCSystem{
 	
 	public void initialize(){
 		this.weights = new double[featureDim];
-		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random() * 100;  //initialize weights to random value
+		for(int dim = 0; dim < featureDim; dim++)this.weights[dim] = Math.random() * 1;  //initialize weights to random value
 		System.out.println("w initialized to");
 		System.out.println(Arrays.toString(this.weights));
 	}
@@ -123,7 +123,7 @@ public class ClassifierBased implements MCSystem{
 		//training
 		System.out.println("Training. ");
 		// learning rate
-		double alpha = 0.0001;
+		double alpha = 0.0001;  //0.0001
 		// weight of l2 term
 		double lambda = 1;
 		// EM, loop until convergence
@@ -174,6 +174,8 @@ public class ClassifierBased implements MCSystem{
 		double delta = 0.001;
 		while(/*count < 1000*/true){
 			count++;
+			//double step = (double)100*alpha /Math.sqrt(count);
+			//System.out.println("adaptive step size is "+step);
 			if (count%20 == 0) {
 				System.out.format("%dth iteration", count);
 				System.out.print("weights is ");
@@ -203,6 +205,8 @@ public class ClassifierBased implements MCSystem{
 			double gradient_norm = 0;
 			for(int dim = 0; dim < featureDim; dim++){  //update theta
 				this.weights[dim] = this.weights[dim] - alpha * gradient[dim];
+				//this.weights[dim] = this.weights[dim] - step * gradient[dim];
+				//gradient_norm += gradient[dim] * gradient[dim] * step;
 				gradient_norm += gradient[dim] * gradient[dim];
 			}
 			if (count%20 == 0) {

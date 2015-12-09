@@ -24,12 +24,14 @@ public class BaselineTwo implements MCSystem {
 		// Read the questions
 		List<Question> questions = task.getQuestions();
 		List<String> passageTokenStrings = task.getPassage().getTokenStrings();
+		//List<String> coref_passageTokenStrings = CorefResolWorker.doCorefResolution(task.getPassage().annotation);
 
 		// Answers stores the answer for each question
 		List<String> answers = new ArrayList<String>();
 		
 		// preprocessing, get token positions in passage
 		HashMap<String,List<Integer>> tokenPosi = tokenPosiInPassage(passageTokenStrings);
+		//HashMap<String,List<Integer>> coref_tokenPosi = tokenPosiInPassage(coref_passageTokenStrings);
 		
 		// Iterate through each question and find answer
 		for (Question question : questions) {
@@ -43,6 +45,11 @@ public class BaselineTwo implements MCSystem {
 			for (String key : IC.keySet()) {
 				IC.setCount(key, Math.log(1 + 1.0 / IC.getCount(key)));
 			}
+			
+			//Counter<String> IC_coref = new ClassicCounter<String>(coref_passageTokenStrings);
+			//for (String key : IC_coref.keySet()) {
+			//	IC_coref.setCount(key, Math.log(1 + 1.0 / IC_coref.getCount(key)));
+			//}
 
 			// Iterate throught options and calculate sw_i
 			List<Double> sw = new ArrayList<Double>();
@@ -50,7 +57,12 @@ public class BaselineTwo implements MCSystem {
 				
 				double scoreBaselineOne = calBaselineOneScore(passageTokenStrings,IC,Q,a);
 				double distancePunish = calDistancePunish(passageTokenStrings,tokenPosi,Q,a);
+				
+				//double coref_scoreBaselineOne = calBaselineOneScore(coref_passageTokenStrings,IC_coref,Q,a);
+				//double coref_distancePunish = calDistancePunish(coref_passageTokenStrings,coref_tokenPosi,Q,a);
 
+				//sw.add(scoreBaselineOne - distancePunish + coref_scoreBaselineOne - coref_distancePunish);
+				System.out.println("Score is " + (scoreBaselineOne - distancePunish));
 				sw.add(scoreBaselineOne - distancePunish);
 			}
 			// Find largest sw and add answer
@@ -120,8 +132,8 @@ public class BaselineTwo implements MCSystem {
 				}
 			}
 		}
-		//System.out.print("BaselineOne return: ");
-		//System.out.println(maxScore);
+		System.out.print("BaselineOne return: ");
+		System.out.println(maxScore);
 		return maxScore;
 	}
 	
@@ -142,14 +154,15 @@ public class BaselineTwo implements MCSystem {
 		set_SAi.removeAll(set_Q);
 		StopWordsRemover.removeStopWords(set_SAi);
 		if(set_SQ.size() == 0 || set_SAi.size() == 0){
-			//System.out.print("Return distance punishment: ");
-			//System.out.println(1);
+			System.out.print("Return distance punishment: ");
+			System.out.println(1);
 			return 1;
 		}
 		else{
-			double ret = (double)getSmallestDistance(tokenPosi,set_SQ,set_SAi) / (passageTokenStrings.size()-1);
-			//System.out.print("Return distance punishment: ");
-			//System.out.println(ret);
+			double ret = (double)(getSmallestDistance(tokenPosi,set_SQ,set_SAi)+1) / (passageTokenStrings.size()-1);
+			System.out.println((getSmallestDistance(tokenPosi,set_SQ,set_SAi)+1) + " over " + (passageTokenStrings.size()-1));
+			System.out.print("Return distance punishment: ");
+			System.out.println(ret);
 			return ret;
 		}
 	}
