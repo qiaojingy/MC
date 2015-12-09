@@ -29,6 +29,7 @@ public class ClassifierBased implements MCSystem{
 		this.featurizers = new ArrayList<Featurizer>();
 		this.featurizerOnes = new ArrayList<FeaturizerOne>();
 
+		//Choose different feature combinitions
 		//FeaturizerOne bFeaturizer = new SlidingWindowFeaturizer();
 		//this.featurizerOnes.add(bFeaturizer);
 		FeaturizerOne bLFeaturizer = new SlidingWindowLFeaturizer();
@@ -37,10 +38,10 @@ public class ClassifierBased implements MCSystem{
 		//this.featurizerOnes.add(dFeaturizer);
 		FeaturizerOne dLFeaturizer = new DistanceBasedLFeaturizer();
 		this.featurizerOnes.add(dLFeaturizer);
-		//Featurizer bFeaturizer_w = new BFeaturizer();
-		//this.featurizers.add(bFeaturizer_w);
-		//Featurizer dFeaturizer_w = new DFeaturizer();
-		//this.featurizers.add(dFeaturizer_w);
+		Featurizer bFeaturizer_w = new BFeaturizer();
+		this.featurizers.add(bFeaturizer_w);
+		Featurizer dFeaturizer_w = new DFeaturizer();
+		this.featurizers.add(dFeaturizer_w);
 		Featurizer syntacticFeaturizer = new SyntacticFeaturizer();
 		this.featurizers.add(syntacticFeaturizer);
 		Featurizer bWFeaturizer = new BWFeaturizer();
@@ -125,7 +126,7 @@ public class ClassifierBased implements MCSystem{
 		// learning rate
 		double alpha = 0.0001;  //0.0001
 		// weight of l2 term
-		double lambda = 1;
+		double lambda = 10;
 		// EM, loop until convergence
 		double[] old_weights = new double[featureDim];
 		int count = 0;
@@ -374,3 +375,4 @@ public class ClassifierBased implements MCSystem{
 		}
 	}
 }
+		//Featurizer bFeaturizer_w = new BFeaturizer();

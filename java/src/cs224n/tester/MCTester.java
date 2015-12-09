@@ -134,7 +134,8 @@ public class MCTester {
 		system.train(trainingTasks,trainingGoldAnswerLists);
 
 		// Read test tasks
-		String dev_or_test = "test";
+		// Test on dev set or on test set
+		String dev_or_test = "dev";
 		fileName = dataPath.concat(new String("mc160."+dev_or_test+".tsv"));
 		List<Task> testTasks = TaskReader.read(fileName,b_coref);
 
